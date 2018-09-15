@@ -7,11 +7,8 @@ target_compile_features (MaiaGameEngineUnitTest PRIVATE cxx_std_17)
 
 target_link_libraries (MaiaGameEngineUnitTest PRIVATE Maia::GameEngine)
 
-find_package (GTest REQUIRED)
-target_link_libraries (MaiaGameEngineUnitTest PRIVATE GTest::GTest GTest::Main)
-
-find_package (GMock REQUIRED)
-target_link_libraries (MaiaGameEngineUnitTest PRIVATE GMock::GMock GMock::Main)
+find_package (Catch2 REQUIRED)
+target_link_libraries (MaiaGameEngineUnitTest PRIVATE Catch2::Catch2)
 
 target_sources (MaiaGameEngineUnitTest 
 	PRIVATE
@@ -19,4 +16,5 @@ target_sources (MaiaGameEngineUnitTest
 		"Transforms/Transform_test.cpp"
 )
 
-gtest_discover_tests(MaiaGameEngineUnitTest)
+include (Catch)
+catch_discover_tests (MaiaGameEngineUnitTest)
