@@ -19,6 +19,13 @@ target_link_libraries (MaiaGameEngine PUBLIC Eigen3::Eigen)
 
 target_sources (MaiaGameEngine 
 	PRIVATE
+		"Maia/GameEngine/Component.hpp"
+		"Maia/GameEngine/Component_group.hpp"
+		"Maia/GameEngine/Component_group_builder.hpp"
+		"Maia/GameEngine/Entity.hpp"
+		"Maia/GameEngine/Entity_manager.hpp"
+		"Maia/GameEngine/System.hpp"
+
 		"Maia/GameEngine/Transforms/Transform.hpp"
 		"Maia/GameEngine/Transforms/Transform.cpp"
 		"Maia/GameEngine/Transforms/Transforms_tree.hpp"
