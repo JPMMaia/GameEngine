@@ -10,24 +10,46 @@
 
 namespace Maia::GameEngine
 {
+	class Entity_not_found : public std::logic_error
+	{
+	};
+
 	class Entity_manager
 	{
 	public:
 
 		using index_type = std::size_t;
 
-		
 
-		Component_group& create_component_group(/*...*/);
+		Entity create_entity(Component_group component_group)
+		{
+			std::find(m_component_groups.begin(), m_component_groups.end(),
+				[](const Component_group& component_group) -> bool { component_group });
 
-		Entity create_entity(Component_group& component_group);
-		void destroy_entity(Entity entity);
+			Entity entity;
+			entity.m_id = m_entities_indices.size();
+
+			m_entities_indices.push_back(entity.m_id);
+
+			return entity;
+		}
+		void destroy_entity(Entity entity)
+		{
+		}
 
 		template <class T>
-		T get_component_data(Entity entity);
+		T get_component_data(Entity entity)
+		{
+			return {};
+		}
 
 		template <class T>
-		void set_component_data(Entity entity, T&& data);
+		void set_component_data(Entity entity, T&& data)
+		{
+			const auto index = m_entities_indices[entity];
+
+			m_component_groups[index];
+		}
 
 		void add_shared_component_data(Entity entity/*, todo */);
 

@@ -22,17 +22,22 @@ namespace Maia::GameEngine
 		template <class ComponentType>
 		void add_component()
 		{
-			m_component_group_hash += std::hash(ComponentType::ID());
+			m_component_group_hash += std::hash<std::uint16_t>{}(ComponentType::ID());
 			m_components_sizes[m_component_count++] = sizeof(ComponentType);
 		}
 
-		Component_group build() const;
+		Component_group build() const
+		{
+			Component_group component_group;
+			component_group.m_first_chunk = std::make_unique<Component_group::MemoryChunk>();
+			return component_group;
+		}
 
 	private:
 
-		std::uint16_t m_component_group_hash;
-		std::array<std::uint16_t, 16> m_components_sizes;
-		std::size_t m_component_count;
+		std::size_t m_component_group_hash{};
+		std::array<std::uint16_t, 16> m_components_sizes{};
+		std::size_t m_component_count{};
 
 	};
 }

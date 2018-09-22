@@ -15,6 +15,9 @@ namespace Maia::GameEngine
 		};
 
 		std::unique_ptr<MemoryChunk> m_first_chunk;
+
+		friend class Component_group_builder;
+		friend class Entity_manager;
 	};
 }
 

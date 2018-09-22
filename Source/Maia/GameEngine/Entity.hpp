@@ -7,7 +7,7 @@ namespace Maia::GameEngine
 {
 	class Entity
 	{
-		friend class EntityManager;
+		friend class Entity_manager;
 
 		std::uint32_t m_id;
 	};

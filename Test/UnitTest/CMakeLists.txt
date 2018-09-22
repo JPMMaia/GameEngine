@@ -13,7 +13,7 @@ target_link_libraries (MaiaGameEngineUnitTest PRIVATE Catch2::Catch2)
 target_sources (MaiaGameEngineUnitTest 
 	PRIVATE
 		"main.cpp"
-		"Transforms/Transform_test.cpp"
+		"Entity_manager.test.cpp"
 )
 
 include (Catch)
