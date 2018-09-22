@@ -2,7 +2,6 @@
 
 #include <catch2/catch.hpp>
 
-#include <Maia/GameEngine/Component_group_builder.hpp>
 #include <Maia/GameEngine/Entity_manager.hpp>
 
 namespace Maia::GameEngine::Test
@@ -32,59 +31,54 @@ namespace Maia::GameEngine::Test
 
 	SCENARIO("Create an entity constituted by a position and then destroy it")
 	{
-		GIVEN("A position")
+		GIVEN("An entity manager")
 		{
-			const Position position{ -1.0f, 1.0f, 0.5f };
+			Entity_manager entity_manager;
 
-			AND_GIVEN("A component group <Position>")
+			AND_GIVEN("A position")
 			{
-				auto component_group = []()-> Component_group
-				{
-					Component_group_builder builder;
-					builder.add_component<Position>();
-					return builder.build();
-				}();
+				const Position position{ -1.0f, 1.0f, 0.5f };
 
-				WHEN("The entity is created")
+				WHEN("The entity type is created")
 				{
-					Entity_manager entity_manager;
-					const auto entity = entity_manager.create_entity(std::move(component_group));
+					const auto entity_type = entity_manager.create_entity_type<Position>();
 
-					AND_WHEN("The entity's position data is set")
+					AND_WHEN("The entity is created")
 					{
-						entity_manager.set_component_data(entity, position);
+						const auto entity = entity_manager.create_entity(entity_type);
 
-						AND_WHEN("The entity's position data is retrieved")
+						AND_WHEN("The entity's position data is set")
 						{
-							const auto queriedPosition = entity_manager.get_component_data<Position>(entity);
+							entity_manager.set_component_data(entity, position);
 
-							THEN("They must match")
+							AND_WHEN("The entity's position data is retrieved")
 							{
-								CHECK(position == queriedPosition);
+								const auto queriedPosition = entity_manager.get_component_data<Position>(entity);
+
+								THEN("They must match")
+								{
+									CHECK(position == queriedPosition);
+								}
+							}
+						}
+
+						AND_WHEN("The entity is destroyed")
+						{
+							entity_manager.destroy_entity(entity);
+
+							THEN("An exception is thrown when trying to retrived data from the destroyed entity")
+							{
+								CHECK_THROWS_AS(
+									entity_manager.get_component_data<Position>(entity),
+									Entity_not_found
+								);
 							}
 						}
 					}
-
-					AND_WHEN("The entity is destroyed")
-					{
-						entity_manager.destroy_entity(entity);
-
-						THEN("An exception is thrown when trying to retrived data from the destroyed entity")
-						{
-							CHECK_THROWS_AS(
-								entity_manager.get_component_data<Position>(entity),
-								Entity_not_found
-							);
-						}
-					}
 				}
+
+				
 			}
-		
-
-			
-			
-
-
 		}
 	}
 }
