@@ -17,6 +17,9 @@ target_include_directories (MaiaGameEngine
 find_package (Eigen3 REQUIRED)
 target_link_libraries (MaiaGameEngine PUBLIC Eigen3::Eigen)
 
+find_package (GSL REQUIRED)
+target_link_libraries (MaiaGameEngine PUBLIC GSL::GSL)
+
 target_sources (MaiaGameEngine 
 	PRIVATE
 		"Maia/GameEngine/Component.hpp"
