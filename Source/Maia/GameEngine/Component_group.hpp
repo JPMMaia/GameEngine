@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 #include <numeric>
+#include <vector>
 
 #include <gsl/span>
 

@@ -64,8 +64,8 @@ namespace Maia::GameEngine
 
 		Entity create_entity(Entity_type entity_type)
 		{
-			Entity entity;
-			entity.m_id = m_entities_data.size();
+			/*Entity entity;
+			entity.m_id = static_cast<uint32_t>(m_entities_data.size());
 
 			const auto entity_type_index = [&]() -> std::size_t
 			{
@@ -79,7 +79,8 @@ namespace Maia::GameEngine
 			}();
 			m_entities_data.push_back(entity_type_index);
 
-			return entity;
+			return entity;*/
+			return {};
 		}
 		void destroy_entity(Entity entity)
 		{

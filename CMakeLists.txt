@@ -19,7 +19,7 @@ if (NOT maiautilities_POPULATED)
 endif ()
 
 
-FetchContent_Declare (
+#[[FetchContent_Declare (
 	MaiaRenderer
 	GIT_REPOSITORY "https://github.com/JPMMaia/Renderer.git"
 	GIT_TAG "master"
@@ -29,10 +29,10 @@ FetchContent_GetProperties (MaiaRenderer)
 if (NOT maiarenderer_POPULATED)
 	FetchContent_Populate (MaiaRenderer)
 	add_subdirectory (${maiarenderer_SOURCE_DIR} ${maiarenderer_BINARY_DIR})
-endif ()
+endif ()]]#
 
 
-project(MaiaGameEngine LANGUAGES C CXX)
+project(MaiaGameEngine LANGUAGES CXX)
 
 add_subdirectory("Source")
 add_subdirectory("Test")

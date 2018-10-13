@@ -5,11 +5,11 @@
 
 namespace Maia::GameEngine
 {
-	class Entity
+	struct Entity
 	{
-		friend class Entity_manager;
+		using ID = std::uint32_t;
 
-		std::uint32_t m_id;
+		ID const id;
 	};
 }
 

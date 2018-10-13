@@ -3,6 +3,11 @@ project (MaiaGameEngine VERSION 0.0.1)
 add_library (MaiaGameEngine)
 add_library (Maia::GameEngine ALIAS MaiaGameEngine)
 
+set_target_properties(MaiaGameEngine 
+	PROPERTIES 
+		LINKER_LANGUAGE CXX
+)
+
 target_compile_features (MaiaGameEngine 
 	PRIVATE 
 		cxx_std_17
@@ -22,16 +27,12 @@ target_link_libraries (MaiaGameEngine PUBLIC GSL::GSL)
 
 target_sources (MaiaGameEngine 
 	PRIVATE
-		"Maia/GameEngine/Component.hpp"
 		"Maia/GameEngine/Component_group.hpp"
 		"Maia/GameEngine/Entity.hpp"
 		"Maia/GameEngine/Entity_manager.hpp"
 		"Maia/GameEngine/Entity_type.hpp"
-		"Maia/GameEngine/System.hpp"
-
-		"Maia/GameEngine/Transforms/Transform.hpp"
-		"Maia/GameEngine/Transforms/Transform.cpp"
-		"Maia/GameEngine/Transforms/Transforms_tree.hpp"
+		"Maia/GameEngine/Memory_chunk.hpp"
+		"Maia/GameEngine/Dummy.cpp"
 )
 
 

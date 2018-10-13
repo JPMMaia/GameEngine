@@ -5,12 +5,10 @@
 
 namespace Maia::GameEngine
 {
-	class Entity_type
+	struct Entity_type
 	{
-		std::bitset<64> m_mask{};
-
-		friend class Entity_manager;
+		std::bitset<64> const mask;
 	};
 }
 
-#endif 
+#endif

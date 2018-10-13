@@ -29,7 +29,7 @@ namespace Maia::GameEngine::Test
 		return outputStream;
 	}
 
-	SCENARIO("Create an entity constituted by a position and then destroy it")
+	/*SCENARIO("Create an entity constituted by a position and then destroy it")
 	{
 		GIVEN("An entity manager")
 		{
@@ -80,5 +80,5 @@ namespace Maia::GameEngine::Test
 				
 			}
 		}
-	}
+	}*/
 }
