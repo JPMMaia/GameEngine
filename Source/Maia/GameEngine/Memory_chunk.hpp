@@ -87,29 +87,20 @@ namespace Maia::GameEngine
 			return sizeof...(Components);
 		}
 
-		template <typename Current>
 		static constexpr std::size_t single_element_size()
 		{
-			return sizeof(Current);
-		}
-
-		template <typename Current, typename ...Rest>
-		static constexpr std::size_t single_element_size()
-		{
-			
-
-			return sizeof(Current) + single_element_size<Rest...>();
+			return (sizeof(Components) + ...);
 		}
 
 		static constexpr std::size_t number_of_elements()
 		{
 			constexpr std::size_t chunk_size = 65536;
 			
-			return chunk_size / single_element_size<Components>();
+			return chunk_size / single_element_size();
 		}
 
-		std::array<std::type_index, sizeof...(Components)> m_components_order;
-		Components_arrays_tuple<65536 / single_element_size<Components...>(), Components...> m_components;
+		std::array<std::type_index, Memory_chunk::number_of_component_types()> m_components_order;
+		Components_arrays_tuple<Memory_chunk::number_of_elements(), Components...> m_components;
 	};
 }
 
