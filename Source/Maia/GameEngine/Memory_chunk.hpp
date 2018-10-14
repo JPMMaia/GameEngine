@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstdint>
+#include <tuple>
 #include <typeindex>
 
 namespace Maia::GameEngine
@@ -80,6 +81,54 @@ namespace Maia::GameEngine
 		{
 		}
 
+		Index push_back(Components... components)
+		{
+			// TODO
+			return { 0 };
+		}
+
+		std::tuple<Components...> pop_back()
+		{
+			// TODO
+			return {};
+		}
+
+		std::tuple<Components...> get_components_data(Index index) const
+		{
+			// TODO
+			return {};
+		}
+
+		void set_components_data(Index index, Components... components)
+		{
+			// TODO
+		}
+
+		template <class Component>
+		Component get_component_data(Index index) const
+		{
+			// TODO
+			return {};
+		}
+
+		template <class Component>
+		void set_component_data(Index index, Component component)
+		{
+			// TODO
+		}
+
+		static constexpr std::size_t capacity()
+		{
+			constexpr std::size_t chunk_size = 65536;
+
+			return chunk_size / single_element_size();
+		}
+
+		std::size_t size() const
+		{
+			return m_size;
+		}
+
 	private:
 
 		static constexpr std::size_t number_of_component_types()
@@ -92,15 +141,9 @@ namespace Maia::GameEngine
 			return (sizeof(Components) + ...);
 		}
 
-		static constexpr std::size_t number_of_elements()
-		{
-			constexpr std::size_t chunk_size = 65536;
-			
-			return chunk_size / single_element_size();
-		}
-
 		std::array<std::type_index, Memory_chunk::number_of_component_types()> m_components_order;
-		Components_arrays_tuple<Memory_chunk::number_of_elements(), Components...> m_components;
+		std::uint16_t m_size;
+		Components_arrays_tuple<Memory_chunk::capacity(), Components...> m_components;
 	};
 }
 
