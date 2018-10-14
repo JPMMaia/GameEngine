@@ -2,69 +2,13 @@
 #define MAIA_GAMEENGINE_MEMORYCHUNK_H_INCLUDED
 
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <tuple>
 #include <typeindex>
 
 namespace Maia::GameEngine
 {
-	template<std::size_t N, typename... Types>
-	class Components_arrays_tuple;
-
-	template<std::size_t N, typename This>
-	class Components_arrays_tuple<N, This>
-	{
-	public:
-		
-		using component_type = This;
-		using array_type = std::array<component_type, N>;
-
-		array_type m_components; // TODO make private
-	};
-
-	template <std::size_t N, typename This, typename ...Rest>
-	class Components_arrays_tuple<N, This, Rest...> :
-		private Components_arrays_tuple<N, Rest...>
-	{
-	public:
-
-		using component_type = This;
-		using array_type = std::array<component_type, N>;
-
-		array_type m_components;  // TODO make private
-	};
-
-	template <std::size_t Index, typename Components_arrays_tuple_>
-	struct Array_type_of_tuple;
-
-	template <std::size_t Index, std::size_t N>
-	struct Array_type_of_tuple<Index, Components_arrays_tuple<N>>
-	{
-	};
-
-	template <std::size_t N, typename This, typename... Rest>
-	struct Array_type_of_tuple<0, Components_arrays_tuple<N, This, Rest...>>
-	{
-		using tuple_type = Components_arrays_tuple<N, This, Rest...>;
-		using array_type = typename tuple_type::array_type;
-	};
-
-	template <std::size_t Index, std::size_t N, typename This, typename... Rest>
-	struct Array_type_of_tuple<Index, Components_arrays_tuple<N, This, Rest...>> :
-		public Array_type_of_tuple<Index - 1, Components_arrays_tuple<N, Rest...>>
-	{
-	};
-
-	template <std::size_t Index, std::size_t N, typename... Types>
-	using Array_type_of_tuple_t = typename Array_type_of_tuple<Index, Components_arrays_tuple<N, Types...>>::array_type;
-
-	template <std::size_t Index, std::size_t N, typename... Types>
-	constexpr Array_type_of_tuple_t<Index, N, Types...>& get(Components_arrays_tuple<N, Types...>& tuple)
-	{
-		typedef typename Array_type_of_tuple<Index, Components_arrays_tuple<N, Types...>>::tuple_type _Ttype;
-		return static_cast<_Ttype&>(tuple).m_components;
-	}
-
 	template <typename ...Components>
 	class Memory_chunk
 	{
@@ -77,31 +21,43 @@ namespace Maia::GameEngine
 
 		Memory_chunk() :
 			m_components_order{ (std::type_index(typeid(Components)))... },
-			m_components{}
+			m_components{},
+			m_size{ 0 }
 		{
 		}
 
 		Index push_back(Components... components)
 		{
-			// TODO
-			return { 0 };
+			assert(size() < capacity());
+
+			constexpr auto number_of_component_types = Memory_chunk::number_of_component_types();
+			set_components_data_impl({ m_size }, components..., std::make_index_sequence<number_of_component_types>{});
+
+			return { m_size++ };
 		}
 
 		std::tuple<Components...> pop_back()
 		{
-			// TODO
-			return {};
+			assert(size() > 0);
+
+			constexpr auto number_of_component_types = Memory_chunk::number_of_component_types();
+			return get_components_data_impl({ --m_size }, std::make_index_sequence<number_of_component_types>{});
 		}
 
 		std::tuple<Components...> get_components_data(Index index) const
 		{
-			// TODO
-			return {};
+			assert(index.value < size());
+
+			constexpr auto number_of_component_types = Memory_chunk::number_of_component_types();
+			return get_components_data_impl(index, std::make_index_sequence<number_of_component_types>{});
 		}
 
 		void set_components_data(Index index, Components... components)
 		{
-			// TODO
+			assert(index.value < size());
+
+			constexpr auto number_of_component_types = Memory_chunk::number_of_component_types();
+			set_components_data_impl(index, components..., std::make_index_sequence<number_of_component_types>{});
 		}
 
 		template <class Component>
@@ -141,9 +97,21 @@ namespace Maia::GameEngine
 			return (sizeof(Components) + ...);
 		}
 
+		template <std::size_t... I>
+		std::tuple<Components...> get_components_data_impl(Index index, std::index_sequence<I...>) const
+		{
+			return { std::get<I>(m_components)[index.value]... };
+		}
+
+		template <std::size_t... I>
+		void set_components_data_impl(Index index, Components... components, std::index_sequence<I...>)
+		{
+			((std::get<I>(m_components)[index.value] = components), ...);
+		}
+
 		std::array<std::type_index, Memory_chunk::number_of_component_types()> m_components_order;
 		std::uint16_t m_size;
-		Components_arrays_tuple<Memory_chunk::capacity(), Components...> m_components;
+		std::tuple<std::array<Components, Memory_chunk::capacity()>...> m_components;
 	};
 }
 

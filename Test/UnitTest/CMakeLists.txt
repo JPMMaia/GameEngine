@@ -15,6 +15,7 @@ target_sources (MaiaGameEngineUnitTest
 		"main.cpp"
 		"Component_group.test.cpp"
 		"Entity_manager.test.cpp"
+		"Memory_chunk.test.cpp"
 )
 
 include (Catch)
