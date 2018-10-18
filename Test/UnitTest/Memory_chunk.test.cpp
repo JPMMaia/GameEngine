@@ -32,9 +32,6 @@ namespace Maia::GameEngine::Test
 
 				auto const index = chunk.push_back(original_position, original_rotation);
 
-				//constexpr auto number_of_component_types = 2;
-				//chunk.get_components_data_impl({ 0 }, std::make_index_sequence<number_of_component_types>{});
-
 				THEN("The returned index should be equals to 0")
 				{
 					CHECK(index.value == 0);
@@ -64,7 +61,7 @@ namespace Maia::GameEngine::Test
 					}
 				}
 
-				AND_WHEN("Setting element at index 0 given Position {- 1.0f, 2.0f, 3.0f } and Rotation { 0.5f, 0.5f, 0.0f, 0.5f }")
+				AND_WHEN("Setting element at index 0 given Position {-1.0f, 2.0f, 3.0f } and Rotation { 0.5f, 0.5f, 0.0f, 0.5f }")
 				{
 					Position new_position{ -1.0f, 2.0f, 3.0f };
 					Rotation new_rotation{ 0.5f, 0.5f, 0.0f, 0.5f };
@@ -83,6 +80,45 @@ namespace Maia::GameEngine::Test
 							CHECK(current_position.y == new_position.y);
 							CHECK(current_position.z == new_position.z);
 
+							CHECK(current_rotation.a == new_rotation.a);
+							CHECK(current_rotation.b == new_rotation.b);
+							CHECK(current_rotation.c == new_rotation.c);
+							CHECK(current_rotation.w == new_rotation.w);
+						}
+					}
+				}
+
+				AND_WHEN("Setting element at index 0 given Position { 1.0f, 4.0f, 2.0f  }")
+				{
+					Position new_position{ 1.0f, 4.0f, 2.0f };
+
+					chunk.set_component_data(index, new_position);
+
+					AND_WHEN("Getting position of element at index 0")
+					{
+						Position const current_position = chunk.get_component_data<Position>(index);
+
+						THEN("The position component should have the same value that was set")
+						{
+							CHECK(current_position.x == new_position.x);
+							CHECK(current_position.y == new_position.y);
+							CHECK(current_position.z == new_position.z);
+						}
+					}
+				}
+
+				AND_WHEN("Setting element at index 0 given Rotation { 1.0f, 2.0f, 3.0f, 4.0f }")
+				{
+					Rotation new_rotation{ 1.0f, 2.0f, 3.0f, 4.0f };
+
+					chunk.set_component_data(index, new_rotation);
+
+					AND_WHEN("Getting rotation of element at index 0")
+					{
+						Rotation const current_rotation = chunk.get_component_data<Rotation>(index);
+
+						THEN("The rotation component should have the same value that was set")
+						{
 							CHECK(current_rotation.a == new_rotation.a);
 							CHECK(current_rotation.b == new_rotation.b);
 							CHECK(current_rotation.c == new_rotation.c);

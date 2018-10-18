@@ -9,7 +9,27 @@
 
 namespace Maia::GameEngine
 {
-	template <typename ...Components>
+	template <std::size_t Index, class Type_to_find, class Current_type, class... Rest>
+	constexpr std::size_t get_first_type_index()
+	{
+		if constexpr (std::is_same_v<Type_to_find, Current_type>)
+		{
+			return Index;
+		}
+		else
+		{
+			return get_first_type_index<Index + 1, Type_to_find, Rest...>();
+		}
+	}
+
+	template <class Type_to_find, class... Types>
+	constexpr std::size_t get_first_type_index()
+	{
+		return get_first_type_index<0, Type_to_find, Types...>();
+	}
+
+	
+	template <typename ...Components> // TODO enable_if for each Component in Components: Component is unique
 	class Memory_chunk
 	{
 	public:
@@ -20,7 +40,6 @@ namespace Maia::GameEngine
 		};
 
 		Memory_chunk() :
-			m_components_order{ (std::type_index(typeid(Components)))... },
 			m_components{},
 			m_size{ 0 }
 		{
@@ -60,17 +79,23 @@ namespace Maia::GameEngine
 			set_components_data_impl(index, components..., std::make_index_sequence<number_of_component_types>{});
 		}
 
-		template <class Component>
+		template <class Component> // TODO enable_if Component is an element of Components
 		Component get_component_data(Index index) const
 		{
-			// TODO
-			return {};
+			constexpr std::size_t array_type_index = get_first_type_index<Component, Components...>();
+
+			return std::get<array_type_index>(m_components)[index.value];
 		}
 
-		template <class Component>
-		void set_component_data(Index index, Component component)
+		template <class Component> // TODO enable_if Component is an element of Components
+		void set_component_data(Index index, Component&& component)
 		{
-			// TODO
+			constexpr std::size_t array_type_index = get_first_type_index<
+				std::remove_reference_t<Component>, 
+				Components...
+			>();
+
+			std::get<array_type_index>(m_components)[index.value] = std::forward<Component>(component);
 		}
 
 		static constexpr std::size_t capacity()
@@ -80,7 +105,7 @@ namespace Maia::GameEngine
 			return chunk_size / single_element_size();
 		}
 
-		std::size_t size() const
+		constexpr std::size_t size() const
 		{
 			return m_size;
 		}
@@ -98,18 +123,17 @@ namespace Maia::GameEngine
 		}
 
 		template <std::size_t... I>
-		std::tuple<Components...> get_components_data_impl(Index index, std::index_sequence<I...>) const
+		constexpr std::tuple<Components...> get_components_data_impl(Index index, std::index_sequence<I...>) const
 		{
 			return { std::get<I>(m_components)[index.value]... };
 		}
 
 		template <std::size_t... I>
-		void set_components_data_impl(Index index, Components... components, std::index_sequence<I...>)
+		constexpr void set_components_data_impl(Index index, Components... components, std::index_sequence<I...>)
 		{
 			((std::get<I>(m_components)[index.value] = components), ...);
 		}
 
-		std::array<std::type_index, Memory_chunk::number_of_component_types()> m_components_order;
 		std::uint16_t m_size;
 		std::tuple<std::array<Components, Memory_chunk::capacity()>...> m_components;
 	};
