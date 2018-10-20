@@ -4,21 +4,24 @@
 
 namespace Maia::GameEngine::Test
 {
-	struct Position
+	namespace
 	{
-		float x, y, z;
-	};
-	
-	struct Rotation
-	{
-		float a, b, c, w;
-	};
+		struct Position
+		{
+			float x, y, z;
+		};
 
-	SCENARIO("Create a memory chunk, add, remove and set components", "[MemoryChunk]")
+		struct Rotation
+		{
+			float a, b, c, w;
+		};
+	}
+
+	SCENARIO("Create a memory chunk, add, remove and set components", "[Memory_chunk]")
 	{
 		GIVEN("A memory chunk of Position and Rotation components")
 		{
-			Memory_chunk<Position, Rotation> chunk;
+			Memory_chunk<10, Position, Rotation> chunk;
 
 			THEN("The chunk has an initial size of 0")
 			{

@@ -6,27 +6,30 @@
 
 namespace Maia::GameEngine::Test
 {
-	struct Position
+	namespace
 	{
-		static std::uint16_t ID()
+		struct Position
 		{
-			return 0;
+			static std::uint16_t ID()
+			{
+				return 0;
+			}
+
+			float x, y, z;
+		};
+
+		bool operator==(const Position& lhs, const Position& rhs)
+		{
+			return lhs.x == rhs.x
+				&& lhs.y == rhs.y
+				&& lhs.z == rhs.z;
 		}
 
-		float x, y, z;
-	};
-
-	bool operator==(const Position& lhs, const Position& rhs)
-	{
-		return lhs.x == rhs.x
-			&& lhs.y == rhs.y
-			&& lhs.z == rhs.z;
-	}
-
-	std::ostream& operator<<(std::ostream& outputStream, const Position& value)
-	{
-		outputStream << "{ " << value.x << ", " << value.y << ", " << value.z << " }";
-		return outputStream;
+		std::ostream& operator<<(std::ostream& outputStream, const Position& value)
+		{
+			outputStream << "{ " << value.x << ", " << value.y << ", " << value.z << " }";
+			return outputStream;
+		}
 	}
 
 	/*SCENARIO("Create an entity constituted by a position and then destroy it")

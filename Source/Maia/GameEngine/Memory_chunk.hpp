@@ -29,7 +29,7 @@ namespace Maia::GameEngine
 	}
 
 	
-	template <typename ...Components> // TODO enable_if for each Component in Components: Component is unique
+	template <std::size_t Capacity, typename ...Components> // TODO enable_if for each Component in Components: Component is unique
 	class Memory_chunk
 	{
 	public:
@@ -100,9 +100,7 @@ namespace Maia::GameEngine
 
 		static constexpr std::size_t capacity()
 		{
-			constexpr std::size_t chunk_size = 65536;
-
-			return chunk_size / single_element_size();
+			return Capacity;
 		}
 
 		constexpr std::size_t size() const
@@ -115,11 +113,6 @@ namespace Maia::GameEngine
 		static constexpr std::size_t number_of_component_types()
 		{
 			return sizeof...(Components);
-		}
-
-		static constexpr std::size_t single_element_size()
-		{
-			return (sizeof(Components) + ...);
 		}
 
 		template <std::size_t... I>

@@ -108,7 +108,6 @@ namespace Maia::GameEngine
 
 		std::vector<std::size_t> m_entities_data;
 		std::vector<Entity_type> m_entities_types;
-		std::vector<Component_group> m_component_groups;
 
 	};
 }
