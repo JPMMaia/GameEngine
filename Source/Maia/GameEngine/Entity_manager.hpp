@@ -1,6 +1,7 @@
 #ifndef MAIA_GAMEENGINE_ENTITYMANAGER_H_INCLUDED
 #define MAIA_GAMEENGINE_ENTITYMANAGER_H_INCLUDED
 
+#include <any>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -41,7 +42,7 @@ namespace Maia::GameEngine
 	{
 	public:
 
-		template <class... Types>
+		template <typename... Types>
 		Entity_type create_entity_type()
 		{
 			Entity_type entity_type;
@@ -86,28 +87,53 @@ namespace Maia::GameEngine
 		{
 		}
 
-		template <class T>
-		T get_component_data(Entity entity)
+		template <typename Component>
+		Component get_component_data(Entity entity) const
 		{
-			const auto& entity_data = m_entities_data[entity.m_id];
-
-			const auto& entity_type = m_entities_types[entity_data];
-
 			return {};
 		}
 
-		template <class T>
-		void set_component_data(Entity entity, T&& data)
+		template <typename... Components>
+		std::tuple<Components...> get_components_data(Entity entity) const
 		{
-			//const auto index = m_entities_indices[entity.m_id];
+			return {};
 		}
 
-		void add_shared_component_data(Entity entity/*, todo */);
+		template <typename Component>
+		void set_component_data(Entity entity, Component&& data)
+		{
+		}
+
+		template <typename... Components>
+		void set_components_data(Entity entity, Components&&... data)
+		{
+		}
+
+		template <typename Shared_component>
+		Shared_component const& get_shared_component_data(Entity_type entity) const
+		{
+			static Shared_component shared_component;
+			return shared_component;
+		}
+
+		template <typename Shared_component>
+		Shared_component& get_shared_component_data(Entity_type entity)
+		{
+			static Shared_component shared_component;
+			return shared_component;
+		}
+
+		template <typename Shared_component>
+		void set_shared_component_data(Entity_type entity, Shared_component&& shared_component)
+		{
+		}
 
 	private:
 
 		std::vector<std::size_t> m_entities_data;
 		std::vector<Entity_type> m_entities_types;
+		std::vector<std::any> m_component_groups;
+		std::vector<std::any> m_shared_components;
 
 	};
 }
