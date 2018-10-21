@@ -12,7 +12,7 @@ namespace Maia::GameEngine
 
 		static constexpr ID empty = 0;
 
-		ID const id { empty };
+		ID id { empty };
 	};
 
 	inline bool operator==(Entity const& lhs, Entity const& rhs)

@@ -28,16 +28,17 @@ namespace Maia::GameEngine
 		return get_first_type_index<0, Type_to_find, Types...>();
 	}
 
+	struct Memory_chunk_index
+	{
+		std::size_t value;
+	};
 	
-	template <std::size_t Capacity, typename ...Components> // TODO enable_if for each Component in Components: Component is unique
+	template <std::size_t Capacity, typename ...Components> // TODO enable_if for each Component in Components: Component is unique.
 	class Memory_chunk
 	{
 	public:
 
-		struct Index
-		{
-			std::uint16_t value;
-		};
+		using Index = Memory_chunk_index;
 
 		Memory_chunk() :
 			m_components{},

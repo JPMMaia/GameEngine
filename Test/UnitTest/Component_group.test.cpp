@@ -145,7 +145,7 @@ namespace Maia::GameEngine::Test
 
 						AND_WHEN("Element 0 is removed")
 						{
-							Component_group_element_moved element_moved_data = component_group.remove({ 0 });
+							Component_group_element_moved element_moved_data = component_group.erase({ 0 });
 
 							THEN("The moved element was the element at the back")
 							{
