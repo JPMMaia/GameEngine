@@ -66,12 +66,31 @@ namespace Maia::GameEngine
 
 		void shrink_to_fit()
 		{
+			std::size_t const ideal_number_of_chunks = (size() + Capacity_per_chunk - 1) / Capacity_per_chunk;
+
+			while (m_chunks.size() > ideal_number_of_chunks)
+			{
+				m_chunks.pop_back();
+			}
+			
+			m_chunks.shrink_to_fit();
 		}
 
 
 		Element_moved erase(Index index)
 		{
-			return {};
+			std::size_t const chunk_index = index.value / Capacity_per_chunk;
+			auto& chunk = *m_chunks[chunk_index];
+
+			Memory_chunk_index const element_index = { index.value - chunk_index };
+
+			auto const components_data_at_back = pop_back();
+			std::apply(
+				[&](auto... components_data) { chunk.set_components_data(element_index, components_data...); },
+				components_data_at_back
+			);
+
+			return { std::get<0>(components_data_at_back) };
 		}
 
 		Index push_back(Entity entity, Components... components)
@@ -95,28 +114,57 @@ namespace Maia::GameEngine
 
 		std::tuple<Entity, Components...> pop_back()
 		{
-			return {};
+			auto& chunk_to_pop = *m_chunks[m_first_chunk_not_full];
+
+			if (m_first_chunk_not_full > 0 && chunk_to_pop.size() == 1)
+			{
+				--m_first_chunk_not_full;
+			}
+
+			return chunk_to_pop.pop_back();
 		}
 
 
-		std::tuple<Entity, Components...> get_components_data(Index index) const
+		std::tuple<Entity, Components...> get_components_data(Index const index) const
 		{
-			return {};
+			std::size_t const chunk_index = index.value / Capacity_per_chunk;
+			auto const& chunk = *m_chunks[chunk_index];
+
+			Memory_chunk_index const element_index = { index.value - chunk_index };
+
+			return chunk.get_components_data(element_index);
 		}
 
 		void set_components_data(Index index, Entity entity, Components... components)
 		{
+			std::size_t const chunk_index = index.value / Capacity_per_chunk;
+			auto& chunk = *m_chunks[chunk_index];
+
+			Memory_chunk_index const element_index = { index.value - chunk_index };
+
+			chunk.set_components_data(element_index, entity, components...);
 		}
 
 		template <typename Component> // TODO enable_if Component is an element of Components
 		Component get_component_data(Index index) const
 		{
-			return {};
+			std::size_t const chunk_index = index.value / Capacity_per_chunk;
+			auto const& chunk = *m_chunks[chunk_index];
+
+			Memory_chunk_index const element_index = { index.value - chunk_index };
+
+			return chunk.get_component_data<Component>(element_index);
 		}
 
 		template <typename Component> // TODO enable_if Component is an element of Components
 		void set_component_data(Index index, Component&& component)
 		{
+			std::size_t const chunk_index = index.value / Capacity_per_chunk;
+			auto& chunk = *m_chunks[chunk_index];
+
+			Memory_chunk_index const element_index = { index.value - chunk_index };
+
+			chunk.set_component_data<Component>(element_index, std::forward<Component>(component));
 		}
 
 

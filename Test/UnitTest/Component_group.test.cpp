@@ -236,9 +236,9 @@ namespace Maia::GameEngine::Test
 
 						THEN("The position and rotation components should have the same value that was set")
 						{
-							CHECK(current_entity == original_entity);
-							CHECK(current_position == original_position);
-							CHECK(current_rotation == original_rotation);
+							CHECK(current_entity == new_entity);
+							CHECK(current_position == new_position);
+							CHECK(current_rotation == new_rotation);
 						}
 					}
 				}
@@ -255,7 +255,7 @@ namespace Maia::GameEngine::Test
 
 						THEN("The position component should have the same value that was set")
 						{
-							CHECK(current_position == original_position);
+							CHECK(current_position == new_position);
 						}
 					}
 				}
@@ -272,7 +272,7 @@ namespace Maia::GameEngine::Test
 
 						THEN("The rotation component should have the same value that was set")
 						{
-							CHECK(current_rotation == original_rotation);
+							CHECK(current_rotation == new_rotation);
 						}
 					}
 				}
