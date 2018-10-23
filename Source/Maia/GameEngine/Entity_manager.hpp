@@ -103,6 +103,12 @@ namespace Maia::GameEngine
 		}
 
 		template <typename Component>
+		bool has_component() const
+		{
+			return false;
+		}
+
+		template <typename Component>
 		Component get_component_data(Entity entity) const
 		{
 			return {};
