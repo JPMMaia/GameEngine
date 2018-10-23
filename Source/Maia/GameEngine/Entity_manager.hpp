@@ -86,6 +86,21 @@ namespace Maia::GameEngine
 		void destroy_entity(Entity entity)
 		{
 		}
+		
+		bool exists(Entity entity) const
+		{
+			return {};
+		}
+
+		template <typename Component>
+		void add_component(Entity entity)
+		{
+		}
+
+		template <typename Component>
+		void remove_componen(Entity entity)
+		{
+		}
 
 		template <typename Component>
 		Component get_component_data(Entity entity) const
