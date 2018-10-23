@@ -98,7 +98,7 @@ namespace Maia::GameEngine
 		}
 
 		template <typename Component>
-		void remove_componen(Entity entity)
+		void remove_component(Entity entity)
 		{
 		}
 
