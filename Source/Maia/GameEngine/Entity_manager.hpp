@@ -45,7 +45,7 @@ namespace Maia::GameEngine
 		template <typename... Types>
 		Entity_type create_entity_type()
 		{
-			Entity_type entity_type;
+			/*Entity_type entity_type;
 			
 			auto set_mask = 
 			{ 
@@ -60,7 +60,8 @@ namespace Maia::GameEngine
 				m_entities_types.push_back(entity_type);
 			}
 
-			return entity_type;
+			return entity_type;*/
+			return {};
 		}
 
 		Entity create_entity(Entity_type entity_type)
@@ -93,7 +94,7 @@ namespace Maia::GameEngine
 		}
 
 		template <typename Component>
-		void add_component(Entity entity)
+		void add_component(Entity entity, Component component)
 		{
 		}
 
@@ -130,31 +131,11 @@ namespace Maia::GameEngine
 		{
 		}
 
-		template <typename Shared_component>
-		Shared_component const& get_shared_component_data(Entity_type entity) const
-		{
-			static Shared_component shared_component;
-			return shared_component;
-		}
-
-		template <typename Shared_component>
-		Shared_component& get_shared_component_data(Entity_type entity)
-		{
-			static Shared_component shared_component;
-			return shared_component;
-		}
-
-		template <typename Shared_component>
-		void set_shared_component_data(Entity_type entity, Shared_component&& shared_component)
-		{
-		}
-
 	private:
 
 		std::vector<std::size_t> m_entities_data;
 		std::vector<Entity_type> m_entities_types;
 		std::vector<std::any> m_component_groups;
-		std::vector<std::any> m_shared_components;
 
 	};
 }
