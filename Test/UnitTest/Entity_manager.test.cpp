@@ -69,12 +69,9 @@ namespace Maia::GameEngine::Test
 						{
 							entity_manager.destroy_entity(entity);
 
-							THEN("An exception is thrown when trying to retrived data from the destroyed entity")
+							THEN("The entity manager should report that the entity does not exist")
 							{
-								CHECK_THROWS_AS(
-									entity_manager.get_component_data<Position>(entity),
-									Entity_not_found
-								);
+								CHECK(!entity_manager.exists(entity));
 							}
 						}
 					}
