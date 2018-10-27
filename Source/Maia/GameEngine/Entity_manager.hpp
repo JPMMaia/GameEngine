@@ -14,25 +14,23 @@
 
 namespace Maia::GameEngine
 {
-	struct Entity_data
+	struct Entity_type_index
 	{
-		std::size_t entity_type_index;
-		bool is_destroyed;
+		std::size_t value;
 	};
 
 	class Entity_manager
 	{
 	public:
 
+		using Component_group = Component_group<65536>;
+
 		template <typename... Types>
 		Entity_type create_entity_type()
 		{
-			m_component_types_groups.emplace_back(
-				make_component_types_group<Types...>()
-			);
+			m_component_groups.emplace_back();
 
 			Entity_type const entity_type{ m_entity_types.size() };
-
 			m_entity_types.push_back(entity_type);
 
 			return entity_type;
@@ -42,7 +40,7 @@ namespace Maia::GameEngine
 		{
 			Entity entity
 			{
-				static_cast<Entity::ID>(m_entities_data.size())
+				static_cast<Entity::ID>(m_entity_type_indices.size())
 			};
 
 			const auto entity_type_index = [&]() -> std::size_t
@@ -52,77 +50,90 @@ namespace Maia::GameEngine
 				return std::distance(m_entity_types.begin(), entity_type_location);
 			}();
 
-			m_entities_data.push_back({ entity_type_index, false });
+			m_entity_type_indices.push_back({ entity_type_index });
 
 			return entity;
 		}
 		void destroy_entity(Entity entity)
 		{
-			m_entities_data[entity.id].is_destroyed = true;
-			
-			m_destroyed_entities.push_back(entity);
+			// TODO
 		}
 		
 		bool exists(Entity entity) const
 		{
-			if (entity.id >= m_entities_data.size())
-				return false;
-
-			return !m_entities_data[entity.id].is_destroyed;
+			// TODO
+			return {};
 		}
 
 		template <typename Component>
 		void add_component(Entity entity, Component component)
 		{
-			// Pre conditions:
-			//	entity_data.is_destroyed == false
-			//	component_types_group.contains<Component>()
-
-			Entity_data const& entity_data = m_entities_data[entity.id];
-
-			Component_types_group component_types_group = m_component_types_groups[entity_data.entity_type_index];
+			// TODO
 		}
 
 		template <typename Component>
 		void remove_component(Entity entity)
 		{
+			// TODO
 		}
 
 		template <typename Component>
 		bool has_component() const
 		{
+			// TODO
 			return false;
 		}
 
 		template <typename Component>
 		Component get_component_data(Entity entity) const
 		{
-			return {};
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Component_group const& component_group = m_component_groups[entity_type_index.value];
+
+			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			return component_group.get_component_data<Component>(component_group_index);
 		}
 
 		template <typename... Components>
 		std::tuple<Components...> get_components_data(Entity entity) const
 		{
-			return {};
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Component_group const& component_group = m_component_groups[entity_type_index.value];
+
+			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			return component_group.get_components_data<Components...>(component_group_index);
 		}
 
 		template <typename Component>
 		void set_component_data(Entity entity, Component&& data)
 		{
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Component_group& component_group = m_component_groups[entity_type_index.value];
+
+			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			component_group.set_component_data<Component>(component_group_index, std::forward<Component>(data));
 		}
 
 		template <typename... Components>
 		void set_components_data(Entity entity, Components&&... data)
 		{
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Component_group& component_group = m_component_groups[entity_type_index.value];
+
+			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			component_group.set_components_data<Components...>(component_group_index, std::forward<Components>(data)...);
 		}
 
 	private:
 
+		// Indexed by Entity_type_index
 		std::vector<Entity_type> m_entity_types;
-		std::vector<Component_types_group> m_component_types_groups;
-		std::vector<std::any> m_component_groups;
-		std::vector<Entity_data> m_entities_data;
-		std::vector<Entity> m_destroyed_entities;
+		std::vector<Component_group> m_component_groups;
+
+		// Indexed by Entity.id
+		std::vector<Entity_type_index> m_entity_type_indices;
+		std::vector<Component_group_index> m_component_group_indices;
+
 	};
 }
 

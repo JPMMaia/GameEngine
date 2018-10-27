@@ -1,54 +1,16 @@
 #include <catch2/catch.hpp>
 
+#include <Test_components.hpp>
+
 #include <Maia/GameEngine/Component_group.hpp>
 
 namespace Maia::GameEngine::Test
 {
-	namespace
-	{
-		struct Position
-		{
-			float x, y, z;
-		};
-
-		bool operator==(Position const& lhs, Position const& rhs)
-		{
-			return lhs.x == rhs.x
-				&& lhs.y == rhs.y
-				&& lhs.z == rhs.z;
-		}
-
-		std::ostream& operator<<(std::ostream& output_stream, Position const& value)
-		{
-			output_stream << "{" << value.x << ", " << value.y << ", " << value.z << "}";
-			return output_stream;
-		}
-
-		struct Rotation
-		{
-			float a, b, c, w;
-		};
-
-		bool operator==(Rotation const& lhs, Rotation const& rhs)
-		{
-			return lhs.a == rhs.a
-				&& lhs.b == rhs.b
-				&& lhs.c == rhs.c
-				&& lhs.w == rhs.w;
-		}
-
-		std::ostream& operator<<(std::ostream& output_stream, Rotation const& value)
-		{
-			output_stream << "{" << value.a << ", " << value.b << ", " << value.c << ", " << value.w << "}";
-			return output_stream;
-		}
-	}
-
 	SCENARIO("Create a component group, add, remove and set components", "[Component_group]")
 	{
 		GIVEN("A component group consisting of Position and Rotation components and capacity per chunk equals 2")
 		{
-			Component_group<2, Position, Rotation> component_group;
+			Component_group<2> component_group;
 
 			THEN("The component group has an initial size of 0")
 			{
@@ -151,7 +113,7 @@ namespace Maia::GameEngine::Test
 							{
 								CHECK(element_moved_data.entity == entity2);
 
-								auto [entity, position, rotation] = component_group.get_components_data({ 0 });
+								auto [entity, position, rotation] = component_group.get_components_data<Entity, Position, Rotation>({ 0 });
 								CHECK(entity == entity2);
 								CHECK(position == position2);
 								CHECK(rotation == rotation2);
@@ -206,7 +168,7 @@ namespace Maia::GameEngine::Test
 
 				AND_WHEN("Getting components of element at index 0")
 				{
-					std::tuple<Entity, Position, Rotation> const components = component_group.get_components_data(index);
+					std::tuple<Entity, Position, Rotation> const components = component_group.get_components_data<Entity, Position, Rotation>(index);
 					Entity const& current_entity = std::get<0>(components);
 					Position const& current_position = std::get<1>(components);
 					Rotation const& current_rotation = std::get<2>(components);
@@ -229,7 +191,7 @@ namespace Maia::GameEngine::Test
 
 					AND_WHEN("Getting components of element at index 0")
 					{
-						std::tuple<Entity, Position, Rotation> const components = component_group.get_components_data(index);
+						std::tuple<Entity, Position, Rotation> const components = component_group.get_components_data<Entity, Position, Rotation>(index);
 						Entity const& current_entity = std::get<0>(components);
 						Position const& current_position = std::get<1>(components);
 						Rotation const& current_rotation = std::get<2>(components);
@@ -279,7 +241,7 @@ namespace Maia::GameEngine::Test
 
 				AND_WHEN("Popping back")
 				{
-					std::tuple<Entity, Position, Rotation> const components = component_group.pop_back();
+					std::tuple<Entity, Position, Rotation> const components = component_group.pop_back<Entity, Position, Rotation>();
 					Entity const& current_entity = std::get<0>(components);
 					Position const& current_position = std::get<1>(components);
 					Rotation const& current_rotation = std::get<2>(components);

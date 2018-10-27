@@ -2,36 +2,12 @@
 
 #include <catch2/catch.hpp>
 
+#include <Test_components.hpp>
+
 #include <Maia/GameEngine/Entity_manager.hpp>
 
 namespace Maia::GameEngine::Test
 {
-	namespace
-	{
-		struct Position
-		{
-			static std::uint16_t ID()
-			{
-				return 0;
-			}
-
-			float x, y, z;
-		};
-
-		bool operator==(const Position& lhs, const Position& rhs)
-		{
-			return lhs.x == rhs.x
-				&& lhs.y == rhs.y
-				&& lhs.z == rhs.z;
-		}
-
-		std::ostream& operator<<(std::ostream& outputStream, const Position& value)
-		{
-			outputStream << "{ " << value.x << ", " << value.y << ", " << value.z << " }";
-			return outputStream;
-		}
-	}
-
 	SCENARIO("Create an entity constituted by a position and then destroy it")
 	{
 		GIVEN("An entity manager")
