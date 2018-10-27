@@ -3,11 +3,18 @@
 
 #include <ostream>
 
+#include <Maia/GameEngine/Component_group.hpp>
+
 namespace Maia::GameEngine::Test
 {
 	struct Position
 	{
 		float x, y, z;
+
+		static Component_ID ID()
+		{
+			return { 0 };
+		}
 	};
 
 	inline bool operator==(Position const& lhs, Position const& rhs)
@@ -26,6 +33,11 @@ namespace Maia::GameEngine::Test
 	struct Rotation
 	{
 		float a, b, c, w;
+
+		static Component_ID ID()
+		{
+			return { 1 };
+		}
 	};
 
 	inline bool operator==(Rotation const& lhs, Rotation const& rhs)

@@ -23,12 +23,10 @@ namespace Maia::GameEngine
 	{
 	public:
 
-		using Component_group = Component_group<65536>;
-
 		template <typename... Types>
 		Entity_type create_entity_type()
 		{
-			m_component_groups.emplace_back();
+			m_component_groups.emplace_back(make_component_group<Entity>(2000));
 
 			Entity_type const entity_type{ m_entity_types.size() };
 			m_entity_types.push_back(entity_type);
@@ -111,7 +109,7 @@ namespace Maia::GameEngine
 			Component_group& component_group = m_component_groups[entity_type_index.value];
 
 			Component_group_index component_group_index = m_component_group_indices[entity.id];
-			component_group.set_component_data<Component>(component_group_index, std::forward<Component>(data));
+			//component_group.set_component_data<Component>(component_group_index, std::forward<Component>(data));
 		}
 
 		template <typename... Components>

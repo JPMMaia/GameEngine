@@ -8,9 +8,9 @@ namespace Maia::GameEngine::Test
 {
 	SCENARIO("Create a component group, add, remove and set components", "[Component_group]")
 	{
-		GIVEN("A component group consisting of Position and Rotation components and capacity per chunk equals 2")
+		GIVEN("A component group consisting of Position and Rotation components and capacity per chunk equals 2 elements")
 		{
-			Component_group<2> component_group;
+			Component_group component_group{ make_component_group<Position, Rotation>(2) };
 
 			THEN("The component group has an initial size of 0")
 			{
