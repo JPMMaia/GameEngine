@@ -10,7 +10,7 @@ namespace Maia::GameEngine::Test
 	{
 		GIVEN("A component group consisting of Position and Rotation components and capacity per chunk equals 2 elements")
 		{
-			Component_group component_group{ make_component_group<Position, Rotation>(2) };
+			Component_group component_group{ make_component_group<Entity, Position, Rotation>(2) };
 
 			THEN("The component group has an initial size of 0")
 			{
@@ -20,132 +20,6 @@ namespace Maia::GameEngine::Test
 			THEN("The component group has an initial capacity of 0")
 			{
 				CHECK(component_group.capacity() == 0);
-			}
-
-			WHEN("Reserving memory on component group so that it can hold at least 3 elements")
-			{
-				component_group.reserve(3);
-
-				THEN("The component group size is 0")
-				{
-					CHECK(component_group.size() == 0);
-				}
-
-				THEN("The component group capacity is 4")
-				{
-					CHECK(component_group.capacity() == 4);
-				}
-
-				AND_WHEN("An element is pushed to the component group")
-				{
-					Entity const entity0{ 0 };
-					Position const position0{ 1.0f, 2.0f, 3.0f };
-					Rotation const rotation0{ 4.0f, 5.0f, 6.0f, 7.0f };
-					component_group.push_back(entity0, position0, rotation0);
-
-					THEN("The component group size is 1")
-					{
-						CHECK(component_group.size() == 1);
-					}
-
-					THEN("The component group capacity is 4")
-					{
-						CHECK(component_group.capacity() == 4);
-					}
-
-					AND_WHEN("The element is removed from the component group")
-					{
-						component_group.pop_back();
-
-						THEN("The component group size is 0")
-						{
-							CHECK(component_group.size() == 0);
-						}
-
-						THEN("The component group capacity is 4")
-						{
-							CHECK(component_group.capacity() == 4);
-						}
-					}
-
-					AND_WHEN("The component group shrinks to fit")
-					{
-						component_group.shrink_to_fit();
-
-						THEN("The component group size is 1")
-						{
-							CHECK(component_group.size() == 1);
-						}
-
-						THEN("The component group capacity is 2")
-						{
-							CHECK(component_group.capacity() == 2);
-						}
-					}
-
-					AND_WHEN("Two more elements are added")
-					{
-						Entity const entity1{ 1 };
-						Position const position1{ 8.0f, 9.0f, 10.0f };
-						Rotation const rotation1{ 11.0f, 12.0f, 13.0f, 14.0f };
-						component_group.push_back(entity1, position1, rotation1);
-
-						Entity const entity2{ 2 };
-						Position const position2{ 15.0f, 16.0f, 17.0f };
-						Rotation const rotation2{ 18.0f, 19.0f, 20.0f, 21.0f };
-						component_group.push_back(entity2, position2, rotation2);
-
-						THEN("The component group size is 3")
-						{
-							CHECK(component_group.size() == 3);
-						}
-
-						THEN("The component group capacity is 4")
-						{
-							CHECK(component_group.capacity() == 4);
-						}
-
-						AND_WHEN("Element 0 is removed")
-						{
-							Component_group_element_moved element_moved_data = component_group.erase({ 0 });
-
-							THEN("The moved element was the element at the back")
-							{
-								CHECK(element_moved_data.entity == entity2);
-
-								auto [entity, position, rotation] = component_group.get_components_data<Entity, Position, Rotation>({ 0 });
-								CHECK(entity == entity2);
-								CHECK(position == position2);
-								CHECK(rotation == rotation2);
-							}
-
-							THEN("The component group size is 2")
-							{
-								CHECK(component_group.size() == 2);
-							}
-
-							THEN("The component group capacity is 4")
-							{
-								CHECK(component_group.capacity() == 4);
-							}
-
-							AND_WHEN("The component group shrinks to fit")
-							{
-								component_group.shrink_to_fit();
-
-								THEN("The component group size is 2")
-								{
-									CHECK(component_group.size() == 2);
-								}
-
-								THEN("The component group capacity is 2")
-								{
-									CHECK(component_group.capacity() == 2);
-								}
-							}
-						}
-					}
-				}
 			}
 
 			WHEN("Pushing back components Position { 2.0f, 0.5f, -1.0f } and Rotation { 0.1f, 0.2f, 0.3f, 1.0f }")
@@ -241,16 +115,143 @@ namespace Maia::GameEngine::Test
 
 				AND_WHEN("Popping back")
 				{
-					std::tuple<Entity, Position, Rotation> const components = component_group.pop_back<Entity, Position, Rotation>();
+					std::tuple<Entity, Position, Rotation> const components = component_group.back<Entity, Position, Rotation>();
 					Entity const& current_entity = std::get<0>(components);
 					Position const& current_position = std::get<1>(components);
 					Rotation const& current_rotation = std::get<2>(components);
+					component_group.pop_back();
 
 					THEN("The entity, position and rotation components should have the same value that was pushed back")
 					{
 						CHECK(current_entity == original_entity);
 						CHECK(current_position == original_position);
 						CHECK(current_rotation == original_rotation);
+					}
+				}
+			}
+
+			WHEN("Reserving memory on component group so that it can hold at least 3 elements")
+			{
+				component_group.reserve(3);
+
+				THEN("The component group size is 0")
+				{
+					CHECK(component_group.size() == 0);
+				}
+
+				THEN("The component group capacity is 4")
+				{
+					CHECK(component_group.capacity() == 4);
+				}
+
+				AND_WHEN("An element is pushed to the component group")
+				{
+					Entity const entity0{ 0 };
+					Position const position0{ 1.0f, 2.0f, 3.0f };
+					Rotation const rotation0{ 4.0f, 5.0f, 6.0f, 7.0f };
+					component_group.push_back(entity0, position0, rotation0);
+
+					THEN("The component group size is 1")
+					{
+						CHECK(component_group.size() == 1);
+					}
+
+					THEN("The component group capacity is 4")
+					{
+						CHECK(component_group.capacity() == 4);
+					}
+
+					AND_WHEN("The element is removed from the component group")
+					{
+						component_group.pop_back();
+
+						THEN("The component group size is 0")
+						{
+							CHECK(component_group.size() == 0);
+						}
+
+						THEN("The component group capacity is 4")
+						{
+							CHECK(component_group.capacity() == 4);
+						}
+					}
+
+					AND_WHEN("The component group shrinks to fit")
+					{
+						component_group.shrink_to_fit();
+
+						THEN("The component group size is 1")
+						{
+							CHECK(component_group.size() == 1);
+						}
+
+						THEN("The component group capacity is 2")
+						{
+							CHECK(component_group.capacity() == 2);
+						}
+					}
+
+					AND_WHEN("Two more elements are added")
+					{
+						Entity const entity1{ 1 };
+						Position const position1{ 8.0f, 9.0f, 10.0f };
+						Rotation const rotation1{ 11.0f, 12.0f, 13.0f, 14.0f };
+						component_group.push_back(entity1, position1, rotation1);
+
+						Entity const entity2{ 2 };
+						Position const position2{ 15.0f, 16.0f, 17.0f };
+						Rotation const rotation2{ 18.0f, 19.0f, 20.0f, 21.0f };
+						component_group.push_back(entity2, position2, rotation2);
+
+						THEN("The component group size is 3")
+						{
+							CHECK(component_group.size() == 3);
+						}
+
+						THEN("The component group capacity is 4")
+						{
+							CHECK(component_group.capacity() == 4);
+						}
+
+						AND_WHEN("Element 0 is removed")
+						{
+							Component_group_element_moved element_moved_data = component_group.erase<Entity, Position, Rotation>({ 0 });
+
+							THEN("The moved element was the element at the back")
+							{
+								CHECK(element_moved_data.entity == entity2);
+
+								auto [entity, position, rotation] = component_group.get_components_data<Entity, Position, Rotation>({ 0 });
+								CHECK(entity == entity2);
+								CHECK(position == position2);
+								CHECK(rotation == rotation2);
+							}
+
+							THEN("The component group size is 2")
+							{
+								CHECK(component_group.size() == 2);
+							}
+
+							THEN("The component group capacity is 4")
+							{
+								CHECK(component_group.capacity() == 4);
+							}
+
+							AND_WHEN("The component group shrinks to fit")
+							{
+								component_group.shrink_to_fit();
+
+								THEN("The component group size is 2")
+								{
+									CHECK(component_group.size() == 2);
+								}
+
+								THEN("The component group capacity is 2")
+								{
+									CHECK(component_group.capacity() == 2);
+								}
+							}
+						}
 					}
 				}
 			}

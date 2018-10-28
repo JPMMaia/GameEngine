@@ -8,16 +8,17 @@ namespace Maia::GameEngine
 {
 	struct Entity
 	{
-		using ID = std::uint32_t;
+		std::uint32_t value {0};
 
-		static constexpr ID empty = 0;
-
-		ID id { empty };
+		static std::uint16_t ID()
+		{
+			return 0;
+		}
 	};
 
 	inline bool operator==(Entity const& lhs, Entity const& rhs)
 	{
-		return lhs.id == rhs.id;
+		return lhs.value == rhs.value;
 	}
 
 	inline bool operator!=(Entity const& lhs, Entity const& rhs)
@@ -27,7 +28,7 @@ namespace Maia::GameEngine
 
 	inline std::ostream& operator<<(std::ostream& output_stream, Entity const& value)
 	{
-		output_stream << "{" << value.id << "}";
+		output_stream << "{" << value.value << "}";
 		return output_stream;
 	}
 }

@@ -13,7 +13,7 @@ namespace Maia::GameEngine::Test
 
 		static Component_ID ID()
 		{
-			return { 0 };
+			return { 1 };
 		}
 	};
 
@@ -36,7 +36,7 @@ namespace Maia::GameEngine::Test
 
 		static Component_ID ID()
 		{
-			return { 1 };
+			return { 2 };
 		}
 	};
 

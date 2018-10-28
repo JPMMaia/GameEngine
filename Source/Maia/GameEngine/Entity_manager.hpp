@@ -36,7 +36,7 @@ namespace Maia::GameEngine
 
 		Entity create_entity(Entity_type entity_type)
 		{
-			Entity entity
+			/*Entity entity
 			{
 				static_cast<Entity::ID>(m_entity_type_indices.size())
 			};
@@ -50,7 +50,9 @@ namespace Maia::GameEngine
 
 			m_entity_type_indices.push_back({ entity_type_index });
 
-			return entity;
+			return entity;*/
+
+			return {};
 		}
 		void destroy_entity(Entity entity)
 		{
@@ -85,40 +87,40 @@ namespace Maia::GameEngine
 		template <typename Component>
 		Component get_component_data(Entity entity) const
 		{
-			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
 			Component_group const& component_group = m_component_groups[entity_type_index.value];
 
-			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			Component_group_index component_group_index = m_component_group_indices[entity.value];
 			return component_group.get_component_data<Component>(component_group_index);
 		}
 
 		template <typename... Components>
 		std::tuple<Components...> get_components_data(Entity entity) const
 		{
-			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
 			Component_group const& component_group = m_component_groups[entity_type_index.value];
 
-			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			Component_group_index component_group_index = m_component_group_indices[entity.value];
 			return component_group.get_components_data<Components...>(component_group_index);
 		}
 
 		template <typename Component>
 		void set_component_data(Entity entity, Component&& data)
 		{
-			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
 			Component_group& component_group = m_component_groups[entity_type_index.value];
 
-			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			Component_group_index component_group_index = m_component_group_indices[entity.value];
 			//component_group.set_component_data<Component>(component_group_index, std::forward<Component>(data));
 		}
 
 		template <typename... Components>
 		void set_components_data(Entity entity, Components&&... data)
 		{
-			Entity_type_index entity_type_index = m_entity_type_indices[entity.id];
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
 			Component_group& component_group = m_component_groups[entity_type_index.value];
 
-			Component_group_index component_group_index = m_component_group_indices[entity.id];
+			Component_group_index component_group_index = m_component_group_indices[entity.value];
 			component_group.set_components_data<Components...>(component_group_index, std::forward<Components>(data)...);
 		}
 
