@@ -33,7 +33,6 @@ target_sources (MaiaGameEngine
 		"Maia/GameEngine/Entity.hpp"
 		"Maia/GameEngine/Entity_manager.hpp"
 		"Maia/GameEngine/Entity_type.hpp"
-		"Maia/GameEngine/Memory_chunk.hpp"
 		"Maia/GameEngine/Dummy.cpp"
 )
 
