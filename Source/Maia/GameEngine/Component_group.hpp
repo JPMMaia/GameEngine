@@ -2,8 +2,8 @@
 #define MAIA_GAMEENGINE_COMPONENTGROUP_H_INCLUDED
 
 #include <algorithm>
+#include <cassert>
 #include <numeric>
-#include <iostream>
 
 #include <gsl/span>
 
@@ -75,6 +75,7 @@ namespace Maia::GameEngine
 			m_chunks.shrink_to_fit();
 		}
 
+
 		template <typename... Component>
 		Element_moved erase(Index index)
 		{
@@ -84,11 +85,7 @@ namespace Maia::GameEngine
 				components_data_at_back
 			);
 
-			if (m_first_chunk_not_full > 0 && m_size % m_capacity_per_chunk == 1)
-			{
-				--m_first_chunk_not_full;
-			}
-			--m_size;
+			decrement_size();
 
 			return { get_component_data<Entity>(index) };
 		}
@@ -104,31 +101,21 @@ namespace Maia::GameEngine
 			std::size_t const chunk_index = m_first_chunk_not_full;
 			Memory_chunk& chunk_to_push = m_chunks[chunk_index];
 			
-			std::size_t const entity_index = m_size % m_capacity_per_chunk;
-			set_components_data_impl(chunk_to_push, entity_index, std::forward<Component>(component)...);
-			++m_size;
+			Component_group_index component_group_index{ size() };
+			std::size_t const entity_index = calculate_entity_index(component_group_index);
 
-			if (m_size % m_capacity_per_chunk == 0)
-			{
-				++m_first_chunk_not_full;
-			}
+			set_components_data(chunk_to_push, entity_index, std::forward<Component>(component)...);
 
-			return { m_size - 1 };
+			increment_size();
+
+			return { size() - 1 };
 		}
 
 		void pop_back()
 		{
-			assert(size() > 0);
-
-			Memory_chunk const& chunk_to_pop = m_chunks[m_first_chunk_not_full];
-
-			if (m_first_chunk_not_full > 0 && m_size % m_capacity_per_chunk == 1)
-			{
-				--m_first_chunk_not_full;
-			}
-
-			--m_size;
+			decrement_size();
 		}
+
 
 		template <typename... Component>
 		std::tuple<Component...> back() const
@@ -136,46 +123,39 @@ namespace Maia::GameEngine
 			return get_components_data<Component...>({ m_size - 1 });
 		}
 
+
 		template <typename Component>
 		Component get_component_data(Index index) const
 		{
-			std::size_t const chunk_index = index.value / m_capacity_per_chunk;
-			Memory_chunk const& chunk = m_chunks[chunk_index];
+			Memory_chunk const& chunk = get_entity_chunk(index);
+			
+			std::size_t const entity_index = calculate_entity_index(index);
+			std::size_t const component_offset = get_component_offset<Component>();
+			std::size_t const component_index = component_offset + entity_index;
 
-			std::size_t const entity_index = index.value % m_capacity_per_chunk;
-
-			const Component_ID component_id = std::remove_reference_t<Component>::ID();
-			auto component_offset = std::find_if(m_component_offsets.begin(), m_component_offsets.end(),
-				[&](Component_offset const& component_offset) -> bool {  return component_offset.id == component_id; });
-
-			std::size_t const component_index = component_offset->offset + entity_index;
-			return reinterpret_cast<Component const&>(chunk[component_index]);
-		}
-
-		template <typename... Component>
-		std::tuple<Component...> get_components_data(Index index) const
-		{
-			std::size_t const chunk_index = index.value / m_capacity_per_chunk;
-			Memory_chunk const& chunk = m_chunks[chunk_index];
-
-			std::size_t const entity_index = index.value % m_capacity_per_chunk;
-			return get_components_data_impl<Component...>(chunk, entity_index);
+			return get_component_data<Component>(chunk, component_index);
 		}
 
 		template <typename Component>
 		void set_component_data(Index index, Component&& component)
 		{
-			std::size_t const chunk_index = index.value / m_capacity_per_chunk;
-			Memory_chunk& chunk = m_chunks[chunk_index];
+			Memory_chunk& chunk = get_entity_chunk(index);
+			
+			std::size_t const entity_index = calculate_entity_index(index);
+			std::size_t const component_offset = get_component_offset<Component>();
+			std::size_t const component_index = component_offset + entity_index;
 
-			std::size_t const entity_index = index.value % m_capacity_per_chunk;
+			set_component_data<Component>(chunk, component_index, std::forward<Component>(component));
+		}
 
-			const Component_ID component_id = std::remove_reference_t<Component>::ID();
-			auto component_offset = std::find_if(m_component_offsets.begin(), m_component_offsets.end(),
-				[&](Component_offset const& component_offset) -> bool {  return component_offset.id == component_id; });
 
-			std::size_t const component_index = component_offset->offset + entity_index;
-			reinterpret_cast<Component&>(chunk[component_index]) = std::forward<Component>(component);
+		template <typename... Component>
+		std::tuple<Component...> get_components_data(Index index) const
+		{
+			Memory_chunk const& chunk = get_entity_chunk(index);
+			std::size_t const entity_index = calculate_entity_index(index);
+
+			return get_components_data<Component...>(chunk, entity_index);
 		}
 
 		template <typename... Component>
@@ -183,17 +163,22 @@ namespace Maia::GameEngine
 		{
 			// Pre-condition: components in order
 
-			std::size_t const chunk_index = index.value / m_capacity_per_chunk;
-			Memory_chunk& chunk = m_chunks[chunk_index];
+			Memory_chunk& chunk = get_entity_chunk(index);
+			std::size_t const entity_index = calculate_entity_index(index);
 
-			std::size_t const entity_index = index.value % m_capacity_per_chunk;
-			set_components_data_impl(chunk, entity_index, std::forward<Component>(component)...);
+			set_components_data(chunk, entity_index, std::forward<Component>(component)...);
 		}
 
 
 	private:
 
 		using Memory_chunk = std::vector<std::byte>;
+
+		template <typename Component>
+		using Reference = std::remove_const_t<std::remove_reference_t<Component>>&;
+
+		template <typename Component>
+		using Const_reference = std::remove_const_t<std::remove_reference_t<Component>> const&;
 
 		struct Memory_chunk_index
 		{
@@ -235,51 +220,110 @@ namespace Maia::GameEngine
 			return component_offsets;
 		}
 
-		template <typename Component>
-		Component get_component_data_impl(Memory_chunk const& chunk, std::size_t entity_index, std::size_t component_type_index) const
-		{
-			std::size_t const component_offset = m_component_offsets[component_type_index].offset;
 
-			std::size_t const component_index = component_offset + entity_index;
-			return reinterpret_cast<std::remove_const_t<std::remove_reference_t<Component>> const&>(chunk[component_index]);
+		void increment_size()
+		{
+			++m_size;
+
+			if (m_size % m_capacity_per_chunk == 0)
+			{
+				++m_first_chunk_not_full;
+			}
+		}
+		void decrement_size()
+		{
+			assert(m_size > 0);
+
+			if (m_first_chunk_not_full > 0 && m_size % m_capacity_per_chunk == 1)
+			{
+				--m_first_chunk_not_full;
+			}
+			
+			--m_size;
 		}
 
-		template <typename... Component, std::size_t... Index>
-		std::tuple<Component...> get_components_data_impl(Memory_chunk const& chunk, std::size_t entity_index, std::index_sequence<Index...>) const
+		Memory_chunk const& get_entity_chunk(Component_group_index component_group_index) const
 		{
-			return std::make_tuple(get_component_data_impl<Component>(chunk, entity_index, Index)...);
+			return m_chunks[component_group_index.value / m_capacity_per_chunk];
+		}
+		Memory_chunk& get_entity_chunk(Component_group_index component_group_index)
+		{
+			return m_chunks[component_group_index.value / m_capacity_per_chunk];
+		}
+
+		std::size_t calculate_entity_index(Component_group_index component_group_index)  const
+		{
+			return component_group_index.value % m_capacity_per_chunk;
+		}
+
+
+		template <typename Component>
+		std::size_t get_component_offset() const
+		{
+			Component_ID const component_id = std::remove_reference_t<Component>::ID();
+
+			auto component_offset = std::find_if(m_component_offsets.begin(), m_component_offsets.end(),
+				[&](Component_offset const& component_offset) -> bool {  return component_offset.id == component_id; });
+
+			return component_offset->offset;
+		}
+
+
+		template <typename Component>
+		Const_reference<Component> get_component_data(Memory_chunk const& chunk, std::size_t component_index) const
+		{
+			return reinterpret_cast<Const_reference<Component>>(chunk[component_index]);
+		}
+
+		template <typename Component>
+		Const_reference<Component> get_component_data(Memory_chunk const& chunk, std::size_t entity_index, std::size_t component_type_index) const
+		{
+			std::size_t const component_offset = m_component_offsets[component_type_index].offset;
+			std::size_t const component_index = component_offset + entity_index;
+
+			return get_component_data<Component>(chunk, component_index);
+		}
+
+
+		template <typename Component>
+		void set_component_data(Memory_chunk& chunk, std::size_t component_index, Component&& component)
+		{
+			reinterpret_cast<Reference<Component>>(chunk[component_index]) = std::forward<Component>(component);
+		}
+
+		template <typename Component>
+		void set_component_data(Memory_chunk& chunk, std::size_t entity_index, std::size_t component_type_index, Component&& component)
+		{
+			std::size_t const component_offset = m_component_offsets[component_type_index].offset;
+			std::size_t const component_index = component_offset + entity_index;
+
+			set_component_data<Component>(chunk, component_index, std::forward<Component>(component));
+		}
+		
+
+		template <typename... Component, std::size_t... Index>
+		std::tuple<Component...> get_components_data(Memory_chunk const& chunk, std::size_t entity_index, std::index_sequence<Index...>) const
+		{
+			return std::make_tuple(get_component_data<Component>(chunk, entity_index, Index)...);
 		}
 
 		template <typename... Component, typename Indices = std::make_index_sequence<sizeof...(Component)>>
-		std::tuple<Component...> get_components_data_impl(Memory_chunk const& chunk, std::size_t entity_index) const
+		std::tuple<Component...> get_components_data(Memory_chunk const& chunk, std::size_t entity_index) const
 		{
-			return get_components_data_impl<Component...>(chunk, entity_index, Indices{});
+			return get_components_data<Component...>(chunk, entity_index, Indices{});
 		}
 
-		template <typename Component>
-		void set_component_data_impl(Memory_chunk& chunk, std::size_t entity_index, std::size_t component_type_index, Component&& component)
-		{
-			std::size_t const component_offset = m_component_offsets[component_type_index].offset;
-
-			std::size_t const component_index = component_offset + entity_index;
-
-			using Pointer = std::remove_const_t<std::remove_reference_t<Component>>*;
-			Pointer pointer = reinterpret_cast<Pointer>(&chunk[component_index]);
-
-			*pointer = std::forward<Component>(component);
-			int i = 0;
-		}
 
 		template <typename... Component, std::size_t... Index>
-		void set_components_data_impl(Memory_chunk& chunk, std::size_t entity_index, std::index_sequence<Index...>, Component&&... component)
+		void set_components_data(Memory_chunk& chunk, std::size_t entity_index, std::index_sequence<Index...>, Component&&... component)
 		{
-			(set_component_data_impl(chunk, entity_index, Index, std::forward<Component>(component)), ...);
+			(set_component_data(chunk, entity_index, Index, std::forward<Component>(component)), ...);
 		}
 
 		template <typename... Component, typename Indices = std::make_index_sequence<sizeof...(Component)>>
-		void set_components_data_impl(Memory_chunk& chunk, std::size_t entity_index, Component&&... component)
+		void set_components_data(Memory_chunk& chunk, std::size_t entity_index, Component&&... component)
 		{
-			set_components_data_impl(chunk, entity_index, Indices{}, std::forward<Component>(component)...);
+			set_components_data(chunk, entity_index, Indices{}, std::forward<Component>(component)...);
 		}
 
 
@@ -299,6 +343,7 @@ namespace Maia::GameEngine
 		{
 			Component_info { Component::ID(), { sizeof(Component) } }...
 		};
+
 		// TODO assert that every component ID is different
 
 		return { component_infos, capacity_per_chunk };
