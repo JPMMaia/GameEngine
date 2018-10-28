@@ -27,6 +27,7 @@ target_link_libraries (MaiaGameEngine PUBLIC GSL::GSL)
 
 target_sources (MaiaGameEngine 
 	PRIVATE
+		"Maia/GameEngine/Component.hpp"
 		"Maia/GameEngine/Component_group.hpp"
 		"Maia/GameEngine/Component_types_group.hpp"
 		"Maia/GameEngine/Entity.hpp"

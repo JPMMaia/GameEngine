@@ -4,15 +4,17 @@
 #include <cstdint>
 #include <ostream>
 
+#include <Maia/GameEngine/Component.hpp>
+
 namespace Maia::GameEngine
 {
 	struct Entity
 	{
 		std::uint32_t value {0};
 
-		static std::uint16_t ID()
+		static Component_ID ID()
 		{
-			return 0;
+			return { 0 };
 		}
 	};
 

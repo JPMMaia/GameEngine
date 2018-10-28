@@ -7,6 +7,7 @@
 
 #include <gsl/span>
 
+#include <Maia/GameEngine/Component.hpp>
 #include <Maia/GameEngine/Entity.hpp>
 
 namespace Maia::GameEngine
@@ -19,27 +20,6 @@ namespace Maia::GameEngine
 	struct Component_group_element_moved
 	{
 		Entity entity;
-	};
-
-	struct Component_ID
-	{
-		std::uint16_t value;
-	};
-
-	inline bool operator==(Component_ID lhs, Component_ID rhs)
-	{
-		return lhs.value == rhs.value;
-	}
-
-	struct Component_size
-	{
-		std::uint16_t value;
-	};
-
-	struct Component_info
-	{
-		Component_ID id;
-		Component_size size;
 	};
 
 	class Component_group
@@ -104,7 +84,13 @@ namespace Maia::GameEngine
 				components_data_at_back
 			);
 
-			return { std::get<0>(components_data_at_back) }; // TODO assuming that entity is first component
+			if (m_first_chunk_not_full > 0 && m_size % m_capacity_per_chunk == 1)
+			{
+				--m_first_chunk_not_full;
+			}
+			--m_size;
+
+			return { get_component_data<Entity>(index) };
 		}
 
 		template <typename... Component>
@@ -122,7 +108,7 @@ namespace Maia::GameEngine
 			set_components_data_impl(chunk_to_push, entity_index, std::forward<Component>(component)...);
 			++m_size;
 
-			if (chunk_to_push.size() == m_capacity_per_chunk)
+			if (m_size % m_capacity_per_chunk == 0)
 			{
 				++m_first_chunk_not_full;
 			}
