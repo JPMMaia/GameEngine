@@ -20,7 +20,7 @@ namespace Maia::GameEngine::Test
 
 				WHEN("The entity type is created")
 				{
-					Entity_type const entity_type = entity_manager.create_entity_type<Position>();
+					Entity_type const entity_type = entity_manager.create_entity_type<Position>(2);
 
 					AND_WHEN("The entity is created")
 					{
@@ -66,7 +66,7 @@ namespace Maia::GameEngine::Test
 
 			AND_GIVEN("An empty entity type")
 			{
-				Entity_type const entity_type = entity_manager.create_entity_type();
+				Entity_type const entity_type = entity_manager.create_entity_type(2);
 
 				WHEN("An entity is created")
 				{
@@ -74,7 +74,7 @@ namespace Maia::GameEngine::Test
 
 					THEN("The entity manager should report that the entity hasn't any Position component associated with it")
 					{
-						CHECK(entity_manager.has_component<Position>() == false);
+						CHECK(entity_manager.has_component<Position>(entity) == false);
 					}
 
 					AND_WHEN("A component type is added to that entity")
@@ -84,7 +84,7 @@ namespace Maia::GameEngine::Test
 
 						THEN("The entity manager should report that the entity has a Position component associated with it")
 						{
-							CHECK(entity_manager.has_component<Position>());
+							CHECK(entity_manager.has_component<Position>(entity));
 						}
 
 						THEN("The component data associated with the entity should have correspond to the given values")
@@ -100,7 +100,7 @@ namespace Maia::GameEngine::Test
 
 							THEN("The entity manager should report that the entity hasn't any Position component associated with it")
 							{
-								CHECK(entity_manager.has_component<Position>() == false);
+								CHECK(entity_manager.has_component<Position>(entity) == false);
 							}
 						}
 					}

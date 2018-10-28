@@ -23,10 +23,13 @@ namespace Maia::GameEngine
 	{
 	public:
 
+		// TODO consider making Entity_type a template and save types with it
+
 		template <typename... Types>
-		Entity_type create_entity_type()
+		Entity_type create_entity_type(std::size_t capacity_per_chunk)
 		{
-			m_component_groups.emplace_back(make_component_group<Entity>(2000));
+			m_component_groups.emplace_back(
+				make_component_group<Types..., Entity>(capacity_per_chunk));
 
 			Entity_type const entity_type{ m_entity_types.size() };
 			m_entity_types.push_back(entity_type);
@@ -34,11 +37,14 @@ namespace Maia::GameEngine
 			return entity_type;
 		}
 
+
 		Entity create_entity(Entity_type entity_type)
 		{
-			/*Entity entity
+			assert(m_entity_type_indices.size() < std::numeric_limits<Entity::Integral_type>::max());
+
+			Entity entity
 			{
-				static_cast<Entity::ID>(m_entity_type_indices.size())
+				static_cast<Entity::Integral_type>(m_entity_type_indices.size())
 			};
 
 			const auto entity_type_index = [&]() -> std::size_t
@@ -49,21 +55,22 @@ namespace Maia::GameEngine
 			}();
 
 			m_entity_type_indices.push_back({ entity_type_index });
+			m_component_group_indices.push_back({ -1 });
 
-			return entity;*/
-
-			return {};
+			return entity;
 		}
+
 		void destroy_entity(Entity entity)
 		{
 			// TODO
 		}
-		
+
 		bool exists(Entity entity) const
 		{
 			// TODO
 			return {};
 		}
+
 
 		template <typename Component>
 		void add_component(Entity entity, Component component)
@@ -78,11 +85,12 @@ namespace Maia::GameEngine
 		}
 
 		template <typename Component>
-		bool has_component() const
+		bool has_component(Entity entity) const
 		{
 			// TODO
 			return false;
 		}
+
 
 		template <typename Component>
 		Component get_component_data(Entity entity) const
@@ -94,6 +102,17 @@ namespace Maia::GameEngine
 			return component_group.get_component_data<Component>(component_group_index);
 		}
 
+		template <typename Component>
+		void set_component_data(Entity entity, Component&& data)
+		{
+			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
+			Component_group& component_group = m_component_groups[entity_type_index.value];
+
+			Component_group_index component_group_index = m_component_group_indices[entity.value];
+			component_group.set_component_data<Component>(component_group_index, std::forward<Component>(data));
+		}
+
+
 		template <typename... Components>
 		std::tuple<Components...> get_components_data(Entity entity) const
 		{
@@ -102,16 +121,6 @@ namespace Maia::GameEngine
 
 			Component_group_index component_group_index = m_component_group_indices[entity.value];
 			return component_group.get_components_data<Components...>(component_group_index);
-		}
-
-		template <typename Component>
-		void set_component_data(Entity entity, Component&& data)
-		{
-			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
-			Component_group& component_group = m_component_groups[entity_type_index.value];
-
-			Component_group_index component_group_index = m_component_group_indices[entity.value];
-			//component_group.set_component_data<Component>(component_group_index, std::forward<Component>(data));
 		}
 
 		template <typename... Components>
@@ -124,7 +133,15 @@ namespace Maia::GameEngine
 			component_group.set_components_data<Components...>(component_group_index, std::forward<Components>(data)...);
 		}
 
+
 	private:
+
+
+		static bool is_valid(Component_group_index component_group_index)
+		{
+			return component_group_index.value != -1;
+		}
+
 
 		// Indexed by Entity_type_index
 		std::vector<Entity_type> m_entity_types;
@@ -133,6 +150,7 @@ namespace Maia::GameEngine
 		// Indexed by Entity.id
 		std::vector<Entity_type_index> m_entity_type_indices;
 		std::vector<Component_group_index> m_component_group_indices;
+
 
 	};
 }

@@ -10,7 +10,10 @@ namespace Maia::GameEngine
 {
 	struct Entity
 	{
-		std::uint32_t value {0};
+		using Integral_type = std::uint32_t;
+
+		Integral_type value {0};
+
 
 		static Component_ID ID()
 		{
