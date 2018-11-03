@@ -38,4 +38,18 @@ namespace Maia::GameEngine
 	}
 }
 
+namespace std
+{
+	template<> struct hash< Maia::GameEngine::Entity>
+	{
+		using argument_type = Maia::GameEngine::Entity;
+		using result_type = std::size_t;
+		
+		result_type operator()(argument_type const& entity) const noexcept
+		{
+			return std::hash<Maia::GameEngine::Entity::Integral_type>{}(entity.value);
+		}
+	};
+}
+
 #endif

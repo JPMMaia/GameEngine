@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <vector>
 
 #include <Maia/GameEngine/Component_group.hpp>
@@ -55,9 +56,20 @@ namespace Maia::GameEngine
 			}();
 
 			m_entity_type_indices.push_back({ entity_type_index });
-			m_component_group_indices.push_back({ -1 });
+			m_component_group_indices.push_back({ std::numeric_limits<std::size_t>::max() });
 
 			return entity;
+		}
+
+		std::vector<Entity> create_entities(Entity_type entity_type)
+		{
+			return {};
+		}
+
+		template <std::size_t N>
+		std::array<Entity, N> create_entities(Entity_type entity_type)
+		{
+			return {};
 		}
 
 		void destroy_entity(Entity entity)
@@ -133,6 +145,36 @@ namespace Maia::GameEngine
 			component_group.set_components_data<Components...>(component_group_index, std::forward<Components>(data)...);
 		}
 
+		Component_group const& get_component_group(Entity_type entity_type) const
+		{
+			return m_component_groups.back();
+		}
+		Component_group& get_component_group(Entity_type entity_type)
+		{
+			return m_component_groups.back();
+		}
+
+
+		gsl::span<const Component_types_group> get_component_types_groups() const
+		{
+			return {};
+		}
+
+		gsl::span<Component_types_group> get_component_types_groups()
+		{
+			return {};
+		}
+
+
+		gsl::span<const Component_group> get_component_groups() const
+		{
+			return m_component_groups;
+		}
+
+		gsl::span<Component_group> get_component_groups()
+		{
+			return m_component_groups;
+		}
 
 	private:
 

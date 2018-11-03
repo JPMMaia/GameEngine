@@ -8,12 +8,17 @@ namespace Maia::GameEngine
 {
     struct Component_types_group
 	{
-		std::bitset<64> mask;
+		using Mask = std::bitset<64>;
 
-		template <typename Component>
-		bool contains()
+		Mask mask;
+
+		template <typename... Component>
+		bool contains() const
 		{
-			return mask.test(Component::ID());
+			Mask include_mask;
+			(include_mask.set(Component::ID().value), ...);
+
+			return (mask & include_mask) == include_mask;
 		}
 	};
 

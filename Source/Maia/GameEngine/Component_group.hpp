@@ -12,6 +12,55 @@
 
 namespace Maia::GameEngine
 {
+	class Components_chunk
+	{
+	public:
+
+		template <typename Component>
+		using Reference = std::remove_const_t<std::remove_reference_t<Component>>&;
+
+		template <typename Component>
+		using Const_reference = std::remove_const_t<std::remove_reference_t<Component>> const&;
+
+
+		template <typename Component>
+		Const_reference<Component> get_component_data(std::size_t component_index) const
+		{
+			return reinterpret_cast<Const_reference<Component>>(m_data[component_index]);
+		}
+
+		template <typename Component>
+		Reference<Component> get_component_data(std::size_t component_index)
+		{
+			return reinterpret_cast<Reference<Component>>(m_data[component_index]);
+		}
+
+		template <typename Component>
+		void set_component_data(std::size_t component_index, Component&& component)
+		{
+			reinterpret_cast<Reference<Component>>(m_data[component_index]) = std::forward<Component>(component);
+		}
+
+
+		template <typename Component>
+		gsl::span<Component> components()
+		{
+			return {};
+		}
+
+		template <typename Component>
+		gsl::span<const Component> components() const
+		{
+			return {};
+		}
+
+
+	private:
+
+		std::vector<std::byte> m_data;
+
+	};
+
 	struct Component_group_index
 	{
 		std::size_t value;
@@ -170,6 +219,17 @@ namespace Maia::GameEngine
 		}
 
 
+		gsl::span<const Components_chunk> components_chunks() const
+		{
+			return {};
+		}
+
+		gsl::span<Components_chunk> components_chunks()
+		{
+			return {};
+		}
+		
+		
 	private:
 
 		using Memory_chunk = std::vector<std::byte>;
