@@ -31,8 +31,6 @@ namespace Maia::GameEngine
 	template <typename... ComponentsT>
 	struct Entity_type
 	{
-		using Components = ComponentsT...;
-
 		Entity_type_id id;
 	};
 

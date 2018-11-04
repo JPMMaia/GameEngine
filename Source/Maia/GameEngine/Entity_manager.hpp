@@ -24,55 +24,118 @@ namespace Maia::GameEngine
 	{
 	public:
 
+		template <typename T>
+		using Remove_cvr_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
 		template <typename... Components>
 		Entity_type<Components...> create_entity_type(std::size_t capacity_per_chunk)
 		{
 			m_component_groups.emplace_back(
 				make_component_group<Components..., Entity>(capacity_per_chunk));
+			
+			m_component_types_groups.emplace_back(
+				make_component_types_group<Components...>()
+			);
 
-			Entity_type<Components...> const entity_type{ m_entity_types.size() };
-			m_entity_types.push_back(entity_type);
+			Entity_type<Components...> const entity_type{ m_entity_type_ids.size() };
+			m_entity_type_ids.push_back(entity_type.id);
 
 			return entity_type;
 		}
 
 		
 		template <typename... Components>
-		Entity create_entity(Entity_type<Components...> entity_type)
+		Entity create_entity(Entity_type<Remove_cvr_t<Components>...> entity_type, Components&&... components)
 		{
 			assert(m_entity_type_indices.size() < std::numeric_limits<Entity::Integral_type>::max());
 
+			const auto entity_type_index = [&]() -> Entity_type_index
+			{
+				const auto entity_type_id_location = std::find(m_entity_type_ids.begin(), m_entity_type_ids.end(), entity_type.id);
+
+				return { static_cast<std::size_t>(std::distance(m_entity_type_ids.begin(), entity_type_id_location)) };
+			}();
+			
 			Entity entity
 			{
 				static_cast<Entity::Integral_type>(m_entity_type_indices.size())
 			};
+			m_entity_type_indices.push_back(entity_type_index);
 
-			const auto entity_type_index = [&]() -> std::size_t
-			{
-				const auto entity_type_location = std::find(m_entity_types.begin(), m_entity_types.end(), entity_type);
-
-				return std::distance(m_entity_types.begin(), entity_type_location);
-			}();
-
-			m_entity_type_indices.push_back({ entity_type_index });
-			m_component_group_indices.push_back({ std::numeric_limits<std::size_t>::max() });
-
-			// TODO push back values and provide other overloads
+			Component_group& component_group = m_component_groups[entity_type_index.value];
+			Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+			m_component_group_indices.push_back(component_group_index);
 
 			return entity;
 		}
 
 		template <typename... Components>
-		std::vector<Entity> create_entities(Entity_type<Components...> entity_type)
+		std::vector<Entity> create_entities(std::size_t count, Entity_type<Remove_cvr_t<Components>...> entity_type, Components&&... components)
 		{
-			return {};
+			assert(m_entity_type_indices.size() + count <= std::numeric_limits<Entity::Integral_type>::max());
+
+			const auto entity_type_index = [&]() -> Entity_type_index
+			{
+				const auto entity_type_id_location = std::find(m_entity_type_ids.begin(), m_entity_type_ids.end(), entity_type.id);
+
+				return { static_cast<std::size_t>(std::distance(m_entity_type_ids.begin(), entity_type_id_location)) };
+			}();
+
+			Component_group& component_group = m_component_groups[entity_type_index.value];
+
+			std::vector<Entity> entities;
+			entities.reserve(count);
+
+			for (std::size_t i = 0; i < count; ++i)
+			{
+				Entity entity
+				{
+					static_cast<Entity::Integral_type>(m_entity_type_indices.size())
+				};
+				m_entity_type_indices.push_back(entity_type_index);
+
+				Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+				m_component_group_indices.push_back(component_group_index);
+
+				entities.push_back(entity);
+			}
+
+			return entities;
 		}
 
-		template <std::size_t N, typename... Components>
-		std::array<Entity, N> create_entities(Entity_type<Components...> entity_type)
+		template <std::size_t Count, typename... Components>
+		std::array<Entity, Count> create_entities(Entity_type<Remove_cvr_t<Components>...> entity_type, Components&&... components)
 		{
-			return {};
+			// TODO probably refactor
+
+			assert(m_entity_type_indices.size() + Count <= std::numeric_limits<Entity::Integral_type>::max());
+
+			const auto entity_type_index = [&]() -> Entity_type_index
+			{
+				const auto entity_type_id_location = std::find(m_entity_type_ids.begin(), m_entity_type_ids.end(), entity_type.id);
+
+				return { static_cast<std::size_t>(std::distance(m_entity_type_ids.begin(), entity_type_id_location)) };
+			}();
+
+			Component_group& component_group = m_component_groups[entity_type_index.value];
+
+			std::array<Entity, Count> entities;
+
+			for (std::size_t i = 0; i < entities.size(); ++i)
+			{
+				Entity entity
+				{
+					static_cast<Entity::Integral_type>(m_entity_type_indices.size())
+				};
+				m_entity_type_indices.push_back(entity_type_index);
+
+				Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+				m_component_group_indices.push_back(component_group_index);
+
+				entities[i] = entity;
+			}
+
+			return entities;
 		}
 
 		void destroy_entity(Entity entity)
@@ -160,12 +223,12 @@ namespace Maia::GameEngine
 
 		gsl::span<const Component_types_group> get_component_types_groups() const
 		{
-			return {};
+			return m_component_types_groups;
 		}
 
 		gsl::span<Component_types_group> get_component_types_groups()
 		{
-			return {};
+			return m_component_types_groups;
 		}
 
 
@@ -190,6 +253,7 @@ namespace Maia::GameEngine
 
 		// Indexed by Entity_type_index
 		std::vector<Entity_type_id> m_entity_type_ids;
+		std::vector<Component_types_group> m_component_types_groups;
 		std::vector<Component_group> m_component_groups;
 
 		// Indexed by Entity.id

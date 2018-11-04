@@ -20,24 +20,19 @@ namespace Maia::GameEngine::Test
 
 				WHEN("The entity type is created")
 				{
-					Entity_type const entity_type = entity_manager.create_entity_type<Position>(2);
+					Entity_type<Position> const entity_type = entity_manager.create_entity_type<Position>(2);
 
-					AND_WHEN("The entity is created")
+					AND_WHEN("The entity is created with a given position data")
 					{
-						Entity const entity = entity_manager.create_entity(entity_type);
+						Entity const entity = entity_manager.create_entity(entity_type, position);
 
-						AND_WHEN("The entity's position data is set")
+						AND_WHEN("The entity's position data is retrieved")
 						{
-							entity_manager.set_component_data(entity, position);
+							Position const queried_position = entity_manager.get_component_data<Position>(entity);
 
-							AND_WHEN("The entity's position data is retrieved")
+							THEN("They must match")
 							{
-								Position const queried_position = entity_manager.get_component_data<Position>(entity);
-
-								THEN("They must match")
-								{
-									CHECK(position == queried_position);
-								}
+								CHECK(position == queried_position);
 							}
 						}
 
@@ -52,64 +47,11 @@ namespace Maia::GameEngine::Test
 						}
 					}
 				}
-
-				
 			}
 		}
 	}
 
-	SCENARIO("Create an entity, then add a component type, set values, get values and finally remove it")
-	{
-		GIVEN("An entity manager")
-		{
-			Entity_manager entity_manager;
-
-			AND_GIVEN("An empty entity type")
-			{
-				Entity_type const entity_type = entity_manager.create_entity_type(2);
-
-				WHEN("An entity is created")
-				{
-					Entity const entity = entity_manager.create_entity(entity_type);
-
-					THEN("The entity manager should report that the entity hasn't any Position component associated with it")
-					{
-						CHECK(entity_manager.has_component<Position>(entity) == false);
-					}
-
-					AND_WHEN("A component type is added to that entity")
-					{
-						Position const original_position { 1.0f, 2.0f, 3.0f };
-						entity_manager.add_component<Position>(entity, original_position);
-
-						THEN("The entity manager should report that the entity has a Position component associated with it")
-						{
-							CHECK(entity_manager.has_component<Position>(entity));
-						}
-
-						THEN("The component data associated with the entity should have correspond to the given values")
-						{
-							Position const current_position = entity_manager.get_component_data<Position>(entity);
-
-							CHECK(original_position == current_position);
-						}
-
-						AND_WHEN("The position component is removed")
-						{
-							entity_manager.remove_component<Position>(entity);
-
-							THEN("The entity manager should report that the entity hasn't any Position component associated with it")
-							{
-								CHECK(entity_manager.has_component<Position>(entity) == false);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	SCENARIO("Create several entitys of different component types, and then iterate through a specific set of components")
+	SCENARIO("Create several entities of different component types, and then iterate through a specific set of components")
 	{
 		GIVEN("An entity manager")
 		{
@@ -123,9 +65,9 @@ namespace Maia::GameEngine::Test
 
 				WHEN("Three entities of each entity type are created")
 				{
-					std::array<Entity, 3> position_entities = entity_manager.create_entities<3>(position_entity_type);
-					std::array<Entity, 3> rotation_entities = entity_manager.create_entities<3>(rotation_entity_type);
-					std::array<Entity, 3> position_rotation_entities = entity_manager.create_entities<3>(position_rotation_entity_type);
+					std::array<Entity, 3> position_entities = entity_manager.create_entities<3>(position_entity_type, Position{});
+					std::array<Entity, 3> rotation_entities = entity_manager.create_entities<3>(rotation_entity_type, Rotation{});
+					std::array<Entity, 3> position_rotation_entities = entity_manager.create_entities<3>(position_rotation_entity_type, Position{}, Rotation{});
 
 					std::array<Position, 6> positions
 					{
@@ -289,7 +231,7 @@ namespace Maia::GameEngine::Test
 											Rotation const& rotation = location->second;
 											CHECK(rotation == rotations[component_index]);
 										}
-										
+
 										++count;
 									}
 								}
@@ -302,4 +244,55 @@ namespace Maia::GameEngine::Test
 			}
 		}
 	}
+
+	/*SCENARIO("Create an entity, then add a component type, set values, get values and finally remove it")
+	{
+		GIVEN("An entity manager")
+		{
+			Entity_manager entity_manager;
+
+			AND_GIVEN("An empty entity type")
+			{
+				Entity_type<> const entity_type = entity_manager.create_entity_type(2);
+
+				WHEN("An entity is created")
+				{
+					Entity const entity = entity_manager.create_entity(entity_type);
+
+					THEN("The entity manager should report that the entity hasn't any Position component associated with it")
+					{
+						CHECK(entity_manager.has_component<Position>(entity) == false);
+					}
+
+					AND_WHEN("A component type is added to that entity")
+					{
+						Position const original_position{ 1.0f, 2.0f, 3.0f };
+						entity_manager.add_component<Position>(entity, original_position);
+
+						THEN("The entity manager should report that the entity has a Position component associated with it")
+						{
+							CHECK(entity_manager.has_component<Position>(entity));
+						}
+
+						THEN("The component data associated with the entity should have correspond to the given values")
+						{
+							Position const current_position = entity_manager.get_component_data<Position>(entity);
+
+							CHECK(original_position == current_position);
+						}
+
+						AND_WHEN("The position component is removed")
+						{
+							entity_manager.remove_component<Position>(entity);
+
+							THEN("The entity manager should report that the entity hasn't any Position component associated with it")
+							{
+								CHECK(entity_manager.has_component<Position>(entity) == false);
+							}
+						}
+					}
+				}
+			}
+		}
+	}*/
 }

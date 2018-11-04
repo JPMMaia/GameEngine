@@ -43,7 +43,7 @@ namespace Maia::GameEngine
 	{
 		Component_types_group component_types_group;
 
-		(component_types_group.mask.set(Components::ID()), ...);
+		(component_types_group.mask.set(Components::ID().value), ...);
 
 		return component_types_group;
 	}
