@@ -23,6 +23,12 @@ namespace Maia::GameEngine
 		using Const_reference = std::remove_const_t<std::remove_reference_t<Component>> const&;
 
 
+		void resize(std::size_t count, std::byte value)
+		{
+			m_data.resize(count, value);
+		}
+
+
 		template <typename Component>
 		Const_reference<Component> get_component_data(std::size_t component_index) const
 		{
@@ -104,7 +110,7 @@ namespace Maia::GameEngine
 
 			while (m_chunks.size() < number_of_chunks)
 			{
-				Memory_chunk& chunk = m_chunks.emplace_back();
+				Components_chunk& chunk = m_chunks.emplace_back();
 				chunk.resize(m_capacity_per_chunk * m_size_of_single_element, std::byte{});
 			}
 		}
@@ -148,7 +154,7 @@ namespace Maia::GameEngine
 			}
 
 			std::size_t const chunk_index = m_first_chunk_not_full;
-			Memory_chunk& chunk_to_push = m_chunks[chunk_index];
+			Components_chunk& chunk_to_push = m_chunks[chunk_index];
 			
 			Component_group_index component_group_index{ size() };
 			std::size_t const entity_index = calculate_entity_index(component_group_index);
@@ -176,7 +182,7 @@ namespace Maia::GameEngine
 		template <typename Component>
 		Component get_component_data(Index index) const
 		{
-			Memory_chunk const& chunk = get_entity_chunk(index);
+			Components_chunk const& chunk = get_entity_chunk(index);
 			
 			std::size_t const entity_index = calculate_entity_index(index);
 			std::size_t const component_offset = get_component_offset<Component>();
@@ -188,7 +194,7 @@ namespace Maia::GameEngine
 		template <typename Component>
 		void set_component_data(Index index, Component&& component)
 		{
-			Memory_chunk& chunk = get_entity_chunk(index);
+			Components_chunk& chunk = get_entity_chunk(index);
 			
 			std::size_t const entity_index = calculate_entity_index(index);
 			std::size_t const component_offset = get_component_offset<Component>();
@@ -201,7 +207,7 @@ namespace Maia::GameEngine
 		template <typename... Component>
 		std::tuple<Component...> get_components_data(Index index) const
 		{
-			Memory_chunk const& chunk = get_entity_chunk(index);
+			Components_chunk const& chunk = get_entity_chunk(index);
 			std::size_t const entity_index = calculate_entity_index(index);
 
 			return get_components_data<Component...>(chunk, entity_index);
@@ -212,7 +218,7 @@ namespace Maia::GameEngine
 		{
 			// Pre-condition: components in order
 
-			Memory_chunk& chunk = get_entity_chunk(index);
+			Components_chunk& chunk = get_entity_chunk(index);
 			std::size_t const entity_index = calculate_entity_index(index);
 
 			set_components_data(chunk, entity_index, std::forward<Component>(component)...);
@@ -221,18 +227,16 @@ namespace Maia::GameEngine
 
 		gsl::span<const Components_chunk> components_chunks() const
 		{
-			return {};
+			return m_chunks;
 		}
 
 		gsl::span<Components_chunk> components_chunks()
 		{
-			return {};
+			return m_chunks;
 		}
 		
 		
 	private:
-
-		using Memory_chunk = std::vector<std::byte>;
 
 		template <typename Component>
 		using Reference = std::remove_const_t<std::remove_reference_t<Component>>&;
@@ -302,11 +306,11 @@ namespace Maia::GameEngine
 			--m_size;
 		}
 
-		Memory_chunk const& get_entity_chunk(Component_group_index component_group_index) const
+		Components_chunk const& get_entity_chunk(Component_group_index component_group_index) const
 		{
 			return m_chunks[component_group_index.value / m_capacity_per_chunk];
 		}
-		Memory_chunk& get_entity_chunk(Component_group_index component_group_index)
+		Components_chunk& get_entity_chunk(Component_group_index component_group_index)
 		{
 			return m_chunks[component_group_index.value / m_capacity_per_chunk];
 		}
@@ -330,13 +334,13 @@ namespace Maia::GameEngine
 
 
 		template <typename Component>
-		Const_reference<Component> get_component_data(Memory_chunk const& chunk, std::size_t component_index) const
+		Const_reference<Component> get_component_data(Components_chunk const& chunk, std::size_t component_index) const
 		{
-			return reinterpret_cast<Const_reference<Component>>(chunk[component_index]);
+			return chunk.get_component_data<Component>(component_index);
 		}
 
 		template <typename Component>
-		Const_reference<Component> get_component_data(Memory_chunk const& chunk, std::size_t entity_index, std::size_t component_type_index) const
+		Const_reference<Component> get_component_data(Components_chunk const& chunk, std::size_t entity_index, std::size_t component_type_index) const
 		{
 			std::size_t const component_offset = m_component_offsets[component_type_index].offset;
 			std::size_t const component_index = component_offset + entity_index;
@@ -346,13 +350,13 @@ namespace Maia::GameEngine
 
 
 		template <typename Component>
-		void set_component_data(Memory_chunk& chunk, std::size_t component_index, Component&& component)
+		void set_component_data(Components_chunk& chunk, std::size_t component_index, Component&& component)
 		{
-			reinterpret_cast<Reference<Component>>(chunk[component_index]) = std::forward<Component>(component);
+			chunk.set_component_data<Component>(component_index, std::forward<Component>(component));
 		}
 
 		template <typename Component>
-		void set_component_data(Memory_chunk& chunk, std::size_t entity_index, std::size_t component_type_index, Component&& component)
+		void set_component_data(Components_chunk& chunk, std::size_t entity_index, std::size_t component_type_index, Component&& component)
 		{
 			std::size_t const component_offset = m_component_offsets[component_type_index].offset;
 			std::size_t const component_index = component_offset + entity_index;
@@ -362,26 +366,26 @@ namespace Maia::GameEngine
 		
 
 		template <typename... Component, std::size_t... Index>
-		std::tuple<Component...> get_components_data(Memory_chunk const& chunk, std::size_t entity_index, std::index_sequence<Index...>) const
+		std::tuple<Component...> get_components_data(Components_chunk const& chunk, std::size_t entity_index, std::index_sequence<Index...>) const
 		{
 			return std::make_tuple(get_component_data<Component>(chunk, entity_index, Index)...);
 		}
 
 		template <typename... Component, typename Indices = std::make_index_sequence<sizeof...(Component)>>
-		std::tuple<Component...> get_components_data(Memory_chunk const& chunk, std::size_t entity_index) const
+		std::tuple<Component...> get_components_data(Components_chunk const& chunk, std::size_t entity_index) const
 		{
 			return get_components_data<Component...>(chunk, entity_index, Indices{});
 		}
 
 
 		template <typename... Component, std::size_t... Index>
-		void set_components_data(Memory_chunk& chunk, std::size_t entity_index, std::index_sequence<Index...>, Component&&... component)
+		void set_components_data(Components_chunk& chunk, std::size_t entity_index, std::index_sequence<Index...>, Component&&... component)
 		{
 			(set_component_data(chunk, entity_index, Index, std::forward<Component>(component)), ...);
 		}
 
 		template <typename... Component, typename Indices = std::make_index_sequence<sizeof...(Component)>>
-		void set_components_data(Memory_chunk& chunk, std::size_t entity_index, Component&&... component)
+		void set_components_data(Components_chunk& chunk, std::size_t entity_index, Component&&... component)
 		{
 			set_components_data(chunk, entity_index, Indices{}, std::forward<Component>(component)...);
 		}
@@ -391,7 +395,7 @@ namespace Maia::GameEngine
 		std::size_t m_size_of_single_element;
 		std::size_t m_capacity_per_chunk;
 		std::size_t m_first_chunk_not_full;
-		std::vector<Memory_chunk> m_chunks;
+		std::vector<Components_chunk> m_chunks;
 		std::vector<Component_offset> m_component_offsets;
 
 	};
