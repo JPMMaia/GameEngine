@@ -49,15 +49,15 @@ namespace Maia::GameEngine
 
 
 		template <typename Component>
-		gsl::span<Component> components()
+		gsl::span<Component> components(std::size_t offset, std::ptrdiff_t count)
 		{
-			return {};
+			return { reinterpret_cast<Component*>(m_data.data() + offset), count };
 		}
 
 		template <typename Component>
-		gsl::span<const Component> components() const
+		gsl::span<Component const> components(std::size_t offset, std::ptrdiff_t count) const
 		{
-			return {};
+			return { reinterpret_cast<Component const*>(m_data.data() + offset), count };
 		}
 
 
@@ -224,8 +224,8 @@ namespace Maia::GameEngine
 			set_components_data(chunk, entity_index, std::forward<Component>(component)...);
 		}
 
-
-		gsl::span<const Components_chunk> components_chunks() const
+		// TODO maybe hide
+		gsl::span<Components_chunk const> components_chunks() const
 		{
 			return m_chunks;
 		}
@@ -235,6 +235,23 @@ namespace Maia::GameEngine
 			return m_chunks;
 		}
 		
+		// TODO maybe pass an index instead of chunk
+		template <typename Component>
+		gsl::span<Component> components(Components_chunk& chunk)
+		{
+			std::size_t const component_offset = get_component_offset<Component>();
+			// TODO check if it is the last chunk and pass correct size accordingly
+			return chunk.components<Component>(component_offset, size()); // TODO wrong
+		}
+
+		template <typename Component>
+		gsl::span<Component const> components(Components_chunk const& chunk) const
+		{
+			std::size_t const component_offset = get_component_offset<Component>();
+
+			return chunk.components<Component>(component_offset, size());
+		}
+
 		
 	private:
 

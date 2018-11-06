@@ -136,8 +136,8 @@ namespace Maia::GameEngine::Test
 
 								for (Components_chunk const& components_chunk : component_group.components_chunks())
 								{
-									gsl::span<const Position> positions = components_chunk.components<Position>();
-									gsl::span<const Entity> entities = components_chunk.components<Entity>();
+									gsl::span<const Position> positions = component_group.components<Position>(components_chunk);
+									gsl::span<const Entity> entities = component_group.components<Entity>(components_chunk);
 
 									for (std::ptrdiff_t component_index = 0; component_index < entities.size(); ++component_index)
 									{
@@ -173,8 +173,8 @@ namespace Maia::GameEngine::Test
 
 								for (Components_chunk const& components_chunk : component_group.components_chunks())
 								{
-									gsl::span<const Rotation> rotations = components_chunk.components<Rotation>();
-									gsl::span<const Entity> entities = components_chunk.components<Entity>();
+									gsl::span<const Rotation> rotations = component_group.components<Rotation>(components_chunk);
+									gsl::span<const Entity> entities = component_group.components<Entity>(components_chunk);
 
 									for (std::ptrdiff_t component_index = 0; component_index < entities.size(); ++component_index)
 									{
@@ -210,9 +210,9 @@ namespace Maia::GameEngine::Test
 
 								for (Components_chunk const& components_chunk : component_group.components_chunks())
 								{
-									gsl::span<const Position> positions = components_chunk.components<Position>();
-									gsl::span<const Rotation> rotations = components_chunk.components<Rotation>();
-									gsl::span<const Entity> entities = components_chunk.components<Entity>();
+									gsl::span<const Position> positions = component_group.components<Position>(components_chunk);
+									gsl::span<const Rotation> rotations = component_group.components<Rotation>(components_chunk);
+									gsl::span<const Entity> entities = component_group.components<Entity>(components_chunk);
 
 									for (std::ptrdiff_t component_index = 0; component_index < entities.size(); ++component_index)
 									{
