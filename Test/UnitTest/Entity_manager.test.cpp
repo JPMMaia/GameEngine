@@ -134,10 +134,10 @@ namespace Maia::GameEngine::Test
 							{
 								Component_group const& component_group = component_groups[component_group_index];
 
-								for (Components_chunk const& components_chunk : component_group.components_chunks())
+								for (std::size_t chunk_index = 0; chunk_index < component_group.num_chunks(); ++chunk_index)
 								{
-									gsl::span<const Position> positions = component_group.components<Position>(components_chunk);
-									gsl::span<const Entity> entities = component_group.components<Entity>(components_chunk);
+									gsl::span<const Position> positions = component_group.components<Position>(chunk_index);
+									gsl::span<const Entity> entities = component_group.components<Entity>(chunk_index);
 
 									for (std::ptrdiff_t component_index = 0; component_index < entities.size(); ++component_index)
 									{
@@ -171,10 +171,10 @@ namespace Maia::GameEngine::Test
 							{
 								Component_group const& component_group = component_groups[component_group_index];
 
-								for (Components_chunk const& components_chunk : component_group.components_chunks())
+								for (std::size_t chunk_index = 0; chunk_index < component_group.num_chunks(); ++chunk_index)
 								{
-									gsl::span<const Rotation> rotations = component_group.components<Rotation>(components_chunk);
-									gsl::span<const Entity> entities = component_group.components<Entity>(components_chunk);
+									gsl::span<const Rotation> rotations = component_group.components<Rotation>(chunk_index);
+									gsl::span<const Entity> entities = component_group.components<Entity>(chunk_index);
 
 									for (std::ptrdiff_t component_index = 0; component_index < entities.size(); ++component_index)
 									{
@@ -208,11 +208,11 @@ namespace Maia::GameEngine::Test
 							{
 								Component_group const& component_group = component_groups[component_group_index];
 
-								for (Components_chunk const& components_chunk : component_group.components_chunks())
+								for (std::size_t chunk_index = 0; chunk_index < component_group.num_chunks(); ++chunk_index)
 								{
-									gsl::span<const Position> positions = component_group.components<Position>(components_chunk);
-									gsl::span<const Rotation> rotations = component_group.components<Rotation>(components_chunk);
-									gsl::span<const Entity> entities = component_group.components<Entity>(components_chunk);
+									gsl::span<const Position> positions = component_group.components<Position>(chunk_index);
+									gsl::span<const Rotation> rotations = component_group.components<Rotation>(chunk_index);
+									gsl::span<const Entity> entities = component_group.components<Entity>(chunk_index);
 
 									for (std::ptrdiff_t component_index = 0; component_index < entities.size(); ++component_index)
 									{
