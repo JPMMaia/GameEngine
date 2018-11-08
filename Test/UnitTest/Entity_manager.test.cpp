@@ -26,6 +26,21 @@ namespace Maia::GameEngine::Test
 					{
 						Entity const entity = entity_manager.create_entity(entity_type, position);
 
+						THEN("The entity manager should report that the entity exists")
+						{
+							CHECK(entity_manager.exists(entity));
+						}
+
+						THEN("The entity manager should report that the entity has a position component")
+						{
+							CHECK(entity_manager.has_component<Position>(entity));
+						}
+
+						THEN("The entity manager should report that the entity doesn't have a rotation component")
+						{
+							CHECK(!entity_manager.has_component<Rotation>(entity));
+						}
+
 						AND_WHEN("The entity's position data is retrieved")
 						{
 							Position const queried_position = entity_manager.get_component_data<Position>(entity);
