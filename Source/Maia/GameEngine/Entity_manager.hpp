@@ -151,22 +151,11 @@ namespace Maia::GameEngine
 
 
 		template <typename Component>
-		void add_component(Entity entity, Component component)
-		{
-			// TODO
-		}
-
-		template <typename Component>
-		void remove_component(Entity entity)
-		{
-			// TODO
-		}
-
-		template <typename Component>
 		bool has_component(Entity entity) const
 		{
-			// TODO
-			return false;
+			Entity_type_index const entity_type_index = m_entity_type_indices[entity.value];
+
+			return m_component_types_groups[entity_type_index.value].contains<Component>();
 		}
 
 
