@@ -55,18 +55,37 @@ namespace Maia::GameEngine
 
 				return { static_cast<std::size_t>(std::distance(m_entity_type_ids.begin(), entity_type_id_location)) };
 			}();
-			
-			Entity entity
+
+			if (!m_deleted_entities.empty())
 			{
-				static_cast<Entity::Integral_type>(m_entity_type_indices.size())
-			};
-			m_entity_type_indices.push_back(entity_type_index);
+				Entity const entity = m_deleted_entities.back();
+				m_deleted_entities.pop_back();
+				m_entities_existence[entity.value] = true;
 
-			Component_group& component_group = m_component_groups[entity_type_index.value];
-			Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
-			m_component_group_indices.push_back(component_group_index);
+				m_entity_type_indices[entity.value] = entity_type_index;
 
-			return entity;
+				Component_group& component_group = m_component_groups[entity_type_index.value];
+				Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+				m_component_group_indices[entity.value] = component_group_index;
+
+				return entity;
+			}
+			else
+			{
+				Entity entity
+				{
+					static_cast<Entity::Integral_type>(m_entity_type_indices.size())
+				};
+				m_entities_existence.push_back(true);
+
+				m_entity_type_indices.push_back(entity_type_index);
+
+				Component_group& component_group = m_component_groups[entity_type_index.value];
+				Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+				m_component_group_indices.push_back(component_group_index);
+
+				return entity;
+			}
 		}
 
 		template <typename... Components>
@@ -88,16 +107,34 @@ namespace Maia::GameEngine
 
 			for (std::size_t i = 0; i < count; ++i)
 			{
-				Entity entity
+				if (!m_deleted_entities.empty())
 				{
-					static_cast<Entity::Integral_type>(m_entity_type_indices.size())
-				};
-				m_entity_type_indices.push_back(entity_type_index);
+					Entity const entity = m_deleted_entities.back();
+					m_deleted_entities.pop_back();
+					m_entities_existence[entity.value] = true;
 
-				Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
-				m_component_group_indices.push_back(component_group_index);
+					m_entity_type_indices[entity.value] = entity_type_index;
 
-				entities.push_back(entity);
+					Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+					m_component_group_indices[entity.value] = component_group_index;
+
+					entities.push_back(entity);
+				}
+				else
+				{
+					Entity entity
+					{
+						static_cast<Entity::Integral_type>(m_entity_type_indices.size())
+					};
+					m_entity_type_indices.push_back(entity_type_index);
+
+					Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+					m_component_group_indices.push_back(component_group_index);
+
+					m_entities_existence.push_back(true);
+
+					entities.push_back(entity);
+				}
 			}
 
 			return entities;
@@ -106,7 +143,7 @@ namespace Maia::GameEngine
 		template <std::size_t Count, typename... Components>
 		std::array<Entity, Count> create_entities(Entity_type<Remove_cvr_t<Components>...> entity_type, Components&&... components)
 		{
-			// TODO probably refactor
+			// TODO refactor
 
 			assert(m_entity_type_indices.size() + Count <= std::numeric_limits<Entity::Integral_type>::max());
 
@@ -123,16 +160,34 @@ namespace Maia::GameEngine
 
 			for (std::size_t i = 0; i < entities.size(); ++i)
 			{
-				Entity entity
+				if (!m_deleted_entities.empty())
 				{
-					static_cast<Entity::Integral_type>(m_entity_type_indices.size())
-				};
-				m_entity_type_indices.push_back(entity_type_index);
+					Entity const entity = m_deleted_entities.back();
+					m_deleted_entities.pop_back();
+					m_entities_existence[entity.value] = true;
 
-				Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
-				m_component_group_indices.push_back(component_group_index);
+					m_entity_type_indices[entity.value] = entity_type_index;
 
-				entities[i] = entity;
+					Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+					m_component_group_indices[entity.value] = component_group_index;
+
+					entities[i] = entity;
+				}
+				else
+				{
+					Entity entity
+					{
+						static_cast<Entity::Integral_type>(m_entity_type_indices.size())
+					};
+					m_entity_type_indices.push_back(entity_type_index);
+
+					Component_group_index component_group_index = component_group.push_back(std::forward<Components>(components)..., entity);
+					m_component_group_indices.push_back(component_group_index);
+
+					m_entities_existence.push_back(true);
+
+					entities[i] = entity;
+				}
 			}
 
 			return entities;
@@ -140,13 +195,21 @@ namespace Maia::GameEngine
 
 		void destroy_entity(Entity entity)
 		{
-			// TODO
+			m_entities_existence[entity.value] = false;
+			m_deleted_entities.push_back(entity);
+
+			Entity_type_index const entity_type_index = m_entity_type_indices[entity.value];
+			Component_group_index const component_group_index = m_component_group_indices[entity.value];
+
+			if (auto const element_moved = m_component_groups[entity_type_index.value].erase(component_group_index))
+			{
+				m_component_group_indices[element_moved->entity.value] = component_group_index;
+			}
 		}
 
 		bool exists(Entity entity) const
 		{
-			// TODO
-			return {};
+			return m_entities_existence[entity.value];
 		}
 
 
@@ -248,6 +311,8 @@ namespace Maia::GameEngine
 		// Indexed by Entity.id
 		std::vector<Entity_type_index> m_entity_type_indices;
 		std::vector<Component_group_index> m_component_group_indices;
+		std::vector<bool> m_entities_existence;
+		std::vector<Entity> m_deleted_entities;
 
 
 	};

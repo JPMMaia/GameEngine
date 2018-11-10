@@ -260,6 +260,218 @@ namespace Maia::GameEngine::Test
 		}
 	}
 
+	SCENARIO("Create entites, remove and then reuse them")
+	{
+		GIVEN("An entity manager")
+		{
+			Entity_manager entity_manager;
+
+			WHEN("Nine entities of Position entity type are created")
+			{
+				auto position_entity_type = entity_manager.create_entity_type<Position>(2);
+
+				std::array<Entity, 3> position_entities_group_1
+				{
+					entity_manager.create_entity(position_entity_type, Position{}),
+					entity_manager.create_entity(position_entity_type, Position{}),
+					entity_manager.create_entity(position_entity_type, Position{})
+				};
+
+				std::array<Entity, 3> position_entities_group_2 = entity_manager.create_entities<3>(position_entity_type, Position{});
+				std::vector<Entity> position_entities_group_3 = entity_manager.create_entities(3, position_entity_type, Position{});
+
+				std::vector<Entity> all_position_entities;
+				all_position_entities.reserve(position_entities_group_1.size() + position_entities_group_2.size() + position_entities_group_3.size());
+				all_position_entities.insert(all_position_entities.end(), position_entities_group_1.begin(), position_entities_group_1.end());
+				all_position_entities.insert(all_position_entities.end(), position_entities_group_2.begin(), position_entities_group_2.end());
+				all_position_entities.insert(all_position_entities.end(), position_entities_group_3.begin(), position_entities_group_3.end());
+
+				THEN("The entity manager should report that entities exist")
+				{
+					for (Entity const entity : all_position_entities)
+					{
+						CHECK(entity_manager.exists(entity));
+					}
+				}
+
+				THEN("The created entities must have a Position component")
+				{
+					for (Entity const entity : all_position_entities)
+					{
+						CHECK(entity_manager.has_component<Position>(entity));
+					}
+				}
+
+				AND_WHEN("Entities are destroyed")
+				{
+					for (Entity const entity : all_position_entities)
+					{
+						entity_manager.destroy_entity(entity);
+					}
+
+					THEN("The entity manager should report that entities don't exist")
+					{
+						for (Entity const entity : all_position_entities)
+						{
+							CHECK(!entity_manager.exists(entity));
+						}
+					}
+
+					THEN("The component group of positions should be empty")
+					{
+						gsl::span<Component_types_group> component_types_group = entity_manager.get_component_types_groups();
+						gsl::span<Component_group> component_groups = entity_manager.get_component_groups();
+
+						for (std::ptrdiff_t component_group_index = 0; component_group_index < component_types_group.size(); ++component_group_index)
+						{
+							Component_types_group types = component_types_group[component_group_index];
+
+							if (types.contains<Position>())
+							{
+								Component_group const& component_group = component_groups[component_group_index];
+
+								CHECK(component_group.size() == 0);
+							}
+						}
+					}
+
+					AND_WHEN("Nine more entities are created, this time with a Rotation component")
+					{
+						auto rotation_entity_type = entity_manager.create_entity_type<Rotation>(2);
+
+						std::array<Entity, 3> rotation_entities_group_1
+						{
+							entity_manager.create_entity(rotation_entity_type, Rotation{}),
+							entity_manager.create_entity(rotation_entity_type, Rotation{}),
+							entity_manager.create_entity(rotation_entity_type, Rotation{})
+						};
+
+						std::array<Entity, 3> rotation_entities_group_2 = entity_manager.create_entities<3>(rotation_entity_type, Rotation{});
+						std::vector<Entity> rotation_entities_group_3 = entity_manager.create_entities(3, rotation_entity_type, Rotation{});
+
+						std::vector<Entity> all_rotation_entities;
+						all_rotation_entities.reserve(rotation_entities_group_1.size() + rotation_entities_group_2.size() + rotation_entities_group_3.size());
+						all_rotation_entities.insert(all_rotation_entities.end(), rotation_entities_group_1.begin(), rotation_entities_group_1.end());
+						all_rotation_entities.insert(all_rotation_entities.end(), rotation_entities_group_2.begin(), rotation_entities_group_2.end());
+						all_rotation_entities.insert(all_rotation_entities.end(), rotation_entities_group_3.begin(), rotation_entities_group_3.end());
+
+						THEN("The created entities should have the same entity values as the previously destroyed ones")
+						{
+							auto by_entity_value = [](Entity lhs, Entity rhs) -> bool { return lhs.value < rhs.value; };
+
+							std::sort(all_position_entities.begin(), all_position_entities.end(), by_entity_value);
+							std::sort(all_rotation_entities.begin(), all_rotation_entities.end(), by_entity_value);
+
+							CHECK(std::equal(all_position_entities.begin(), all_position_entities.end(), all_rotation_entities.begin()));
+						}
+
+						THEN("The entity manager should report that the entities exist")
+						{
+							for (Entity const entity : all_rotation_entities)
+							{
+								CHECK(entity_manager.exists(entity));
+							}
+						}
+
+						THEN("The component group of rotations should have size equals 9")
+						{
+							gsl::span<Component_types_group> component_types_group = entity_manager.get_component_types_groups();
+							gsl::span<Component_group> component_groups = entity_manager.get_component_groups();
+
+							for (std::ptrdiff_t component_group_index = 0; component_group_index < component_types_group.size(); ++component_group_index)
+							{
+								Component_types_group types = component_types_group[component_group_index];
+
+								if (types.contains<Rotation>())
+								{
+									Component_group const& component_group = component_groups[component_group_index];
+
+									CHECK(component_group.size() == all_rotation_entities.size());
+								}
+							}
+						}
+
+						THEN("The recreated entities must not have a Position component")
+						{
+							for (Entity const entity : all_rotation_entities)
+							{
+								CHECK(!entity_manager.has_component<Position>(entity));
+							}
+						}
+
+						THEN("The recreated entities must have a Rotation component")
+						{
+							for (Entity const entity : all_rotation_entities)
+							{
+								CHECK(entity_manager.has_component<Rotation>(entity));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	SCENARIO("Create three entities and set different positions. Then destroy the first and check if the other entities are still valid")
+	{
+		GIVEN("An entity manager")
+		{
+			Entity_manager entity_manager;
+
+			WHEN("Three entities of Position entity type are created")
+			{
+				auto const position_entity_type = entity_manager.create_entity_type<Position>(2);
+
+				std::array<Entity, 3> entities = entity_manager.create_entities<3>(position_entity_type, Position{});
+
+				std::array<Position, 3> const positions
+				{
+					Position{ 1.0f, 2.0f, 3.0f },
+					Position{ 4.0f, 5.0f, 6.0f },
+					Position{ 7.0f, 8.0f, 9.0f },
+				};
+
+				for (std::size_t entity_index = 0; entity_index < entities.size(); ++entity_index)
+				{
+					entity_manager.set_component_data(entities[entity_index], positions[entity_index]);
+				}
+
+				THEN("The set component data should correspond to the get component data")
+				{
+					for (std::size_t entity_index = 0; entity_index < entities.size(); ++entity_index)
+					{
+						Position const position = entity_manager.get_component_data<Position>(entities[entity_index]);
+						CHECK(position == positions[entity_index]);
+					}
+				}
+
+				AND_WHEN("The first entity is destroyed")
+				{
+					entity_manager.destroy_entity(entities[0]);
+
+					THEN("The entity manager should report that the first entity does not exist")
+					{
+						CHECK(!entity_manager.exists(entities[0]));
+					}
+
+					AND_WHEN("A new entity is created")
+					{
+						entities[0] = entity_manager.create_entity(position_entity_type, positions[0]);
+
+						THEN("The entities component data should be valid")
+						{
+							for (std::size_t entity_index = 0; entity_index < entities.size(); ++entity_index)
+							{
+								Position const position = entity_manager.get_component_data<Position>(entities[entity_index]);
+								CHECK(position == positions[entity_index]);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	/*SCENARIO("Create an entity, then add a component type, set values, get values and finally remove it")
 	{
 		GIVEN("An entity manager")
