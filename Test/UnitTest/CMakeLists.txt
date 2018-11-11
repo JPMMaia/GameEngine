@@ -17,6 +17,7 @@ target_sources (MaiaGameEngineUnitTest
 		"main.cpp"
 		"Component_group.test.cpp"
 		"Entity_manager.test.cpp"
+		"Systems/Transform_system.test.cpp"
 		
 		"Test_components.hpp"
 )
