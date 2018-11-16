@@ -2,13 +2,26 @@
 #define MAIA_GAMEENGINE_TRANSFORMSYSTEM_H_INCLUDED
 
 #include <deque>
+#include <future>
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include <Maia/GameEngine/Entity.hpp>
+#include <Maia/GameEngine/Entity_manager.hpp>
 
 namespace Maia::GameEngine::Systems
 {
+	struct Position
+	{
+		Eigen::Vector3f value;
+	};
+
+	struct Rotation
+	{
+		Eigen::Quaternionf value;
+	};
+
 	struct Transform_dirty
 	{
 		bool value;
@@ -19,16 +32,33 @@ namespace Maia::GameEngine::Systems
 		Entity entity;
 	};
 
-	struct Transform_world_matrix
+	struct Transform_matrix
 	{
 		Eigen::Matrix4f value;
 	};
+
+	using Transforms_tree = std::unordered_multimap<Transform_parent, Entity>;
+
+
+	Transform_matrix build_transform(Position const& position, Rotation const& rotation);
+	
+	Transforms_tree build_transforms_tree(
+		Entity_manager const& entity_manager,
+		Entity root_transform_entity
+	);
+
+	void build_child_transforms(
+		Entity_manager& entity_manager,
+		Transforms_tree const& transforms_tree,
+		Entity root_transform_entity
+	);
+
 
 	class Transform_system
 	{
 	public:
 
-		void execute()
+		std::future<void> execute_async()
 		{
 			// Go through all entities that have a Position, Rotation and not have a Transform_parent
 			{
@@ -39,6 +69,8 @@ namespace Maia::GameEngine::Systems
 					// build_transformation_tree
 				}
 			}
+
+			return {};
 		}
 
 	private:
