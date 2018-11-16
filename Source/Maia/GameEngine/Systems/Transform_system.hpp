@@ -2,6 +2,7 @@
 #define MAIA_GAMEENGINE_TRANSFORMSYSTEM_H_INCLUDED
 
 #include <deque>
+#include <functional>
 #include <future>
 
 #include <Eigen/Core>
@@ -38,10 +39,26 @@ namespace Maia::GameEngine::Systems
 	};
 
 	using Transforms_tree = std::unordered_multimap<Transform_parent, Entity>;
+}
 
+namespace std
+{
+	template<> struct hash<Maia::GameEngine::Systems::Transform_parent>
+	{
+		using argument_type = Maia::GameEngine::Systems::Transform_parent;
+		using result_type = std::size_t;
 
+		result_type operator()(argument_type const& transform_parent) const noexcept
+		{
+			return std::hash<std::uint32_t>{}(transform_parent.entity.value);
+		}
+	};
+}
+
+namespace Maia::GameEngine::Systems
+{
 	Transform_matrix build_transform(Position const& position, Rotation const& rotation);
-	
+
 	Transforms_tree build_transforms_tree(
 		Entity_manager const& entity_manager,
 		Entity root_transform_entity

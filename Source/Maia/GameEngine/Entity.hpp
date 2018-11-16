@@ -2,6 +2,7 @@
 #define MAIA_GAMEENGINE_ENTITY_H_INCLUDED
 
 #include <cstdint>
+#include <functional>
 #include <ostream>
 
 #include <Maia/GameEngine/Component.hpp>

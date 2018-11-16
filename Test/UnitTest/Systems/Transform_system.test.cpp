@@ -4,5 +4,8 @@
 
 namespace Maia::GameEngine::Systems::Test
 {
+	SCENARIO()
+	{
 
+	}
 }
