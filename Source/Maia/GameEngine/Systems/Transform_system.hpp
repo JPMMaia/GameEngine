@@ -15,32 +15,12 @@ namespace Maia::GameEngine::Systems
 {
 	struct Position
 	{
-		Eigen::Vector3f value;
-
-		Position() :
-			value{ 0.0f, 0.0f, 0.0f }
-		{
-		}
-
-		Position(Eigen::Vector3f value) :
-			value(value)
-		{
-		}
+		Eigen::Vector3f value{ 0.0f, 0.0f, 0.0f };
 	};
 
 	struct Rotation
 	{
-		Eigen::Quaternionf value;
-
-		Rotation() :
-			value{ 1.0f, 0.0f, 0.0f, 0.0f }
-		{
-		}
-
-		Rotation(Eigen::Quaternionf value) :
-			value(value)
-		{
-		}
+		Eigen::Quaternionf value{ 1.0f, 0.0f, 0.0f, 0.0f };
 	};
 
 	struct Transform_dirty
@@ -56,37 +36,7 @@ namespace Maia::GameEngine::Systems
 
 	struct Transform_matrix
 	{
-		Eigen::Matrix4f value;
-
-		Transform_matrix() = default;
-
-		Transform_matrix(
-			Eigen::Vector3f const& translation,
-			Eigen::Quaternionf const& rotation
-		)
-		{
-			Eigen::Matrix3f const rotation_matrix = rotation.matrix();
-
-			value <<
-				rotation_matrix(0, 0), rotation_matrix(0, 1), rotation_matrix(0, 2), translation(0),
-				rotation_matrix(1, 0), rotation_matrix(1, 1), rotation_matrix(1, 2), translation(1),
-				rotation_matrix(2, 0), rotation_matrix(2, 1), rotation_matrix(2, 2), translation(2),
-				0.0f, 0.0f, 0.0f, 1.0f;
-		}
-
-		Transform_matrix(
-			Eigen::Vector3f const& first_column, 
-			Eigen::Vector3f const& second_column,
-			Eigen::Vector3f const& third_column,
-			Eigen::Vector3f const& fourth_column
-		)
-		{
-			value <<
-				first_column(0), second_column(0), third_column(0), fourth_column(0),
-				first_column(1), second_column(1), third_column(1), fourth_column(1),
-				first_column(2), second_column(2), third_column(2), fourth_column(2),
-				0.0f, 0.0f, 0.0f, 1.0f;
-		}
+		Eigen::Matrix4f value{ Eigen::Matrix4f::Identity() };
 	};
 
 	using Transforms_tree = std::unordered_multimap<Transform_parent, Entity>;
