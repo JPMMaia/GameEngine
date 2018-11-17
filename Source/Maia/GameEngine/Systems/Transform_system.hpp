@@ -16,11 +16,31 @@ namespace Maia::GameEngine::Systems
 	struct Position
 	{
 		Eigen::Vector3f value;
+
+		Position() :
+			value{ 0.0f, 0.0f, 0.0f }
+		{
+		}
+
+		Position(Eigen::Vector3f value) :
+			value(value)
+		{
+		}
 	};
 
 	struct Rotation
 	{
 		Eigen::Quaternionf value;
+
+		Rotation() :
+			value{ 1.0f, 0.0f, 0.0f, 0.0f }
+		{
+		}
+
+		Rotation(Eigen::Quaternionf value) :
+			value(value)
+		{
+		}
 	};
 
 	struct Transform_dirty
@@ -30,12 +50,43 @@ namespace Maia::GameEngine::Systems
 
 	struct Transform_parent
 	{
-		Entity entity;
+		Entity root_entity;
+		Entity parent_entity;
 	};
 
 	struct Transform_matrix
 	{
 		Eigen::Matrix4f value;
+
+		Transform_matrix() = default;
+
+		Transform_matrix(
+			Eigen::Vector3f const& translation,
+			Eigen::Quaternionf const& rotation
+		)
+		{
+			Eigen::Matrix3f const rotation_matrix = rotation.matrix();
+
+			value <<
+				rotation_matrix(0, 0), rotation_matrix(0, 1), rotation_matrix(0, 2), translation(0),
+				rotation_matrix(1, 0), rotation_matrix(1, 1), rotation_matrix(1, 2), translation(1),
+				rotation_matrix(2, 0), rotation_matrix(2, 1), rotation_matrix(2, 2), translation(2),
+				0.0f, 0.0f, 0.0f, 1.0f;
+		}
+
+		Transform_matrix(
+			Eigen::Vector3f const& first_column, 
+			Eigen::Vector3f const& second_column,
+			Eigen::Vector3f const& third_column,
+			Eigen::Vector3f const& fourth_column
+		)
+		{
+			value <<
+				first_column(0), second_column(0), third_column(0), fourth_column(0),
+				first_column(1), second_column(1), third_column(1), fourth_column(1),
+				first_column(2), second_column(2), third_column(2), fourth_column(2),
+				0.0f, 0.0f, 0.0f, 1.0f;
+		}
 	};
 
 	using Transforms_tree = std::unordered_multimap<Transform_parent, Entity>;
@@ -43,6 +94,8 @@ namespace Maia::GameEngine::Systems
 
 namespace std
 {
+	// TODO refactor
+
 	template<> struct hash<Maia::GameEngine::Systems::Transform_parent>
 	{
 		using argument_type = Maia::GameEngine::Systems::Transform_parent;
@@ -50,21 +103,21 @@ namespace std
 
 		result_type operator()(argument_type const& transform_parent) const noexcept
 		{
-			return std::hash<std::uint32_t>{}(transform_parent.entity.value);
+			return std::hash<std::uint32_t>{}(transform_parent.parent_entity.value);
 		}
 	};
 }
 
 namespace Maia::GameEngine::Systems
 {
-	Transform_matrix build_transform(Position const& position, Rotation const& rotation);
+	Transform_matrix create_transform(Position const& position, Rotation const& rotation);
 
-	Transforms_tree build_transforms_tree(
+	Transforms_tree create_transforms_tree(
 		Entity_manager const& entity_manager,
 		Entity root_transform_entity
 	);
 
-	void build_child_transforms(
+	void update_child_transforms(
 		Entity_manager& entity_manager,
 		Transforms_tree const& transforms_tree,
 		Entity root_transform_entity

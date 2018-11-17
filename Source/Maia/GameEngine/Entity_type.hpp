@@ -11,16 +11,16 @@ namespace Maia::GameEngine
 		std::size_t value;
 	};
 
-	bool operator==(Entity_type_id lhs, Entity_type_id rhs)
+	inline bool operator==(Entity_type_id lhs, Entity_type_id rhs)
 	{
 		return lhs.value == rhs.value;
 	}
-	bool operator!=(Entity_type_id lhs, Entity_type_id rhs)
+	inline bool operator!=(Entity_type_id lhs, Entity_type_id rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	std::ostream& operator<<(std::ostream& output_stream, Entity_type_id entity_type_id)
+	inline std::ostream& operator<<(std::ostream& output_stream, Entity_type_id entity_type_id)
 	{
 		output_stream << entity_type_id.value;
 

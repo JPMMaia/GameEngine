@@ -22,16 +22,16 @@ namespace Maia::GameEngine
 		}
 	};
 
-	bool operator==(Component_types_group lhs, Component_types_group rhs)
+	inline bool operator==(Component_types_group lhs, Component_types_group rhs)
 	{
 		return lhs.mask == rhs.mask;
 	}
-	bool operator!=(Component_types_group lhs, Component_types_group rhs)
+	inline bool operator!=(Component_types_group lhs, Component_types_group rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	std::ostream& operator<<(std::ostream& output_stream, Component_types_group value)
+	inline std::ostream& operator<<(std::ostream& output_stream, Component_types_group value)
 	{
 		output_stream << value.mask;
 
