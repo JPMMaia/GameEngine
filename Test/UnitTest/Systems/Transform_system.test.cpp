@@ -76,8 +76,42 @@ namespace Maia::GameEngine::Systems::Test
 					1.0f, 0.0f, 0.0f, 2.0f,
 					0.0f, 0.0f, 1.0f, 3.0f,
 					0.0f, 0.0f, 0.0f, 1.0f;
+				
+				CHECK(transform.value.isApprox(expected_matrix));
+			}
+		}
+	}
 
-				CHECK(transform.value.isApprox(expected_matrix, 0.0001f));
+	SCENARIO("Create transform trees")
+	{
+		GIVEN("An entity manager")
+		{
+			Entity_manager entity_manager{};
+
+			AND_GIVEN("A Root_transform_entity_type <Position, Rotation, Transform_matrix>")
+			{
+				auto const root_transform_entity_type =
+					entity_manager.create_entity_type<Position, Rotation, Transform_matrix>(2);
+
+				AND_GIVEN("Several root transform entities")
+				{
+					std::array<Entity, 4> root_transform_entities =
+						entity_manager.create_entities<4>(root_transform_entity_type, Position{}, Rotation{}, Transform_matrix{});
+
+					WHEN("Creating transform tree for a given root transform entity")
+					{
+						Entity const root_transform_entity = root_transform_entities[1];
+
+						Transforms_tree const transform_tree =
+							create_transforms_tree(entity_manager, root_transform_entity);
+
+						THEN("The transform tree should have one entity without any children (empty transform_tree)")
+						{
+							CHECK(transform_tree.find({ root_transform_entity }) == transform_tree.end());
+						}
+					}
+					
+				}
 			}
 		}
 	}

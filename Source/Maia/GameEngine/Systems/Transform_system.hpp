@@ -16,27 +16,71 @@ namespace Maia::GameEngine::Systems
 	struct Position
 	{
 		Eigen::Vector3f value{ 0.0f, 0.0f, 0.0f };
+
+		static Component_ID ID()
+		{
+			return { 0 };
+		}
 	};
 
 	struct Rotation
 	{
 		Eigen::Quaternionf value{ 1.0f, 0.0f, 0.0f, 0.0f };
+
+		static Component_ID ID()
+		{
+			return { 1 };
+		}
 	};
 
 	struct Transform_dirty
 	{
 		bool value;
+
+		static Component_ID ID()
+		{
+			return { 2 };
+		}
 	};
 
 	struct Transform_parent
 	{
-		Entity root_entity;
-		Entity parent_entity;
+		Entity entity;
+
+		static Component_ID ID()
+		{
+			return { 3 };
+		}
+	};
+
+	inline bool operator==(Transform_parent const& lhs, Transform_parent const& rhs)
+	{
+		return lhs.entity == rhs.entity;
+	}
+	inline bool operator!=(Transform_parent const& lhs, Transform_parent const& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+
+	struct Transform_root
+	{
+		Entity entity;
+
+		static Component_ID ID()
+		{
+			return { 4 };
+		}
 	};
 
 	struct Transform_matrix
 	{
 		Eigen::Matrix4f value{ Eigen::Matrix4f::Identity() };
+
+		static Component_ID ID()
+		{
+			return { 5 };
+		}
 	};
 
 	using Transforms_tree = std::unordered_multimap<Transform_parent, Entity>;
@@ -53,7 +97,7 @@ namespace std
 
 		result_type operator()(argument_type const& transform_parent) const noexcept
 		{
-			return std::hash<std::uint32_t>{}(transform_parent.parent_entity.value);
+			return std::hash<Maia::GameEngine::Entity::Integral_type>{}(transform_parent.entity.value);
 		}
 	};
 }
