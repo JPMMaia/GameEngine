@@ -445,6 +445,15 @@ namespace Maia::GameEngine::Test
 					}
 				}
 
+				THEN("The entity values themselves should be valid")
+				{
+					for (std::size_t entity_index = 0; entity_index < entities.size(); ++entity_index)
+					{
+						Entity const entity = entity_manager.get_component_data<Entity>(entities[entity_index]);
+						CHECK(entity == entities[entity_index]);
+					}
+				}
+
 				AND_WHEN("The first entity is destroyed")
 				{
 					entity_manager.destroy_entity(entities[0]);
@@ -464,6 +473,15 @@ namespace Maia::GameEngine::Test
 							{
 								Position const position = entity_manager.get_component_data<Position>(entities[entity_index]);
 								CHECK(position == positions[entity_index]);
+							}
+						}
+
+						THEN("The entity values themselves should be valid")
+						{
+							for (std::size_t entity_index = 0; entity_index < entities.size(); ++entity_index)
+							{
+								Entity const entity = entity_manager.get_component_data<Entity>(entities[entity_index]);
+								CHECK(entity == entities[entity_index]);
 							}
 						}
 					}
