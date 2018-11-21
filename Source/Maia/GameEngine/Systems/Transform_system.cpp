@@ -22,7 +22,40 @@ namespace Maia::GameEngine::Systems
 		Entity root_transform_entity
 	)
 	{
-		return {};
+		Transforms_tree transforms_tree;
+
+		gsl::span<Component_types_group const> const component_types_groups =
+			entity_manager.get_component_types_groups();
+
+		gsl::span<Component_group const> const component_groups =
+			entity_manager.get_component_groups();
+
+		for (std::ptrdiff_t component_group_index = 0; component_group_index < component_groups.size(); ++component_group_index)
+		{
+			Component_types_group const component_types = component_types_groups[component_group_index];
+
+			if (component_types.contains<Transform_root, Transform_parent>())
+			{
+				Component_group const& component_group = component_groups[component_group_index];
+
+				for (std::size_t chunk_index = 0; chunk_index < component_group.num_chunks(); ++chunk_index)
+				{
+					gsl::span<Transform_root const> roots = component_group.components<Transform_root>(chunk_index);
+					gsl::span<Transform_parent const> parents = component_group.components<Transform_parent>(chunk_index);
+					gsl::span<Entity const> entities = component_group.components<Entity>(chunk_index);
+
+					for (std::ptrdiff_t component_index = 0; component_index < roots.size(); ++component_index)
+					{
+						if (roots[component_index].entity == root_transform_entity)
+						{
+							transforms_tree.insert(std::make_pair(parents[component_index], entities[component_index]));
+						}
+					}
+				}
+			}
+		}
+
+		return transforms_tree;
 	}
 
 	void update_child_transforms(

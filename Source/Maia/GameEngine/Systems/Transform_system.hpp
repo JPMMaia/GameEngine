@@ -19,7 +19,7 @@ namespace Maia::GameEngine::Systems
 
 		static Component_ID ID()
 		{
-			return { 0 };
+			return { 1 };
 		}
 	};
 
@@ -29,7 +29,7 @@ namespace Maia::GameEngine::Systems
 
 		static Component_ID ID()
 		{
-			return { 1 };
+			return { 2 };
 		}
 	};
 
@@ -39,7 +39,7 @@ namespace Maia::GameEngine::Systems
 
 		static Component_ID ID()
 		{
-			return { 2 };
+			return { 3 };
 		}
 	};
 
@@ -49,7 +49,7 @@ namespace Maia::GameEngine::Systems
 
 		static Component_ID ID()
 		{
-			return { 3 };
+			return { 4 };
 		}
 	};
 
@@ -69,7 +69,7 @@ namespace Maia::GameEngine::Systems
 
 		static Component_ID ID()
 		{
-			return { 4 };
+			return { 5 };
 		}
 	};
 
@@ -79,7 +79,7 @@ namespace Maia::GameEngine::Systems
 
 		static Component_ID ID()
 		{
-			return { 5 };
+			return { 6 };
 		}
 	};
 
