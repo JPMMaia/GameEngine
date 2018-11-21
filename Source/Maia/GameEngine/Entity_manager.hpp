@@ -34,7 +34,7 @@ namespace Maia::GameEngine
 				make_component_group<Components..., Entity>(capacity_per_chunk));
 			
 			m_component_types_groups.emplace_back(
-				make_component_types_group<Components...>()
+				make_component_types_group<Components..., Entity>()
 			);
 
 			Entity_type<Components...> const entity_type{ m_entity_type_ids.size() };
