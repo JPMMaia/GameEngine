@@ -89,6 +89,12 @@ namespace Maia::GameEngine
 		}
 
 		template <typename... Components>
+		Entity create_entity(Entity_type<Components...> entity_type)
+		{
+			return create_entity(entity_type, Components{}...);
+		}
+
+		template <typename... Components>
 		std::vector<Entity> create_entities(std::size_t count, Entity_type<Remove_cvr_t<Components>...> entity_type, Components&&... components)
 		{
 			assert(m_entity_type_indices.size() + count <= std::numeric_limits<Entity::Integral_type>::max());
