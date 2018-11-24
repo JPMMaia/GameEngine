@@ -58,11 +58,49 @@ namespace Maia::GameEngine::Systems
 		return transforms_tree;
 	}
 
+	namespace
+	{
+		using transforms_tree_iterator = std::unordered_multimap<Transform_parent, Entity>::const_iterator;
+
+		void update_child_transforms_aux(
+			Entity_manager& entity_manager,
+			Transforms_tree const& transforms_tree,
+			Entity root_transform_entity,
+			Transform_matrix const& root_transform_matrix,
+			std::pair<transforms_tree_iterator, transforms_tree_iterator> children_range
+		)
+		{
+			for (auto it = children_range.first; it != children_range.second; ++it)
+			{
+				Entity const child_entity = it->second;
+
+				auto const[position, rotation] = entity_manager.get_components_data<Position, Rotation>(child_entity);
+
+				Transform_matrix const local_transform_matrix = create_transform(position, rotation);
+
+				Transform_matrix const world_transform_matrix{ local_transform_matrix.value * root_transform_matrix.value };
+				entity_manager.set_component_data(child_entity, world_transform_matrix);
+
+				auto const children_of_child_range = transforms_tree.equal_range({ child_entity });
+				update_child_transforms_aux(entity_manager, transforms_tree, child_entity, world_transform_matrix, children_of_child_range);
+			}
+		}
+	}
+
 	void update_child_transforms(
 		Entity_manager& entity_manager,
 		Transforms_tree const& transforms_tree,
 		Entity root_transform_entity
 	)
 	{
+		auto const children_range = transforms_tree.equal_range({ root_transform_entity });
+
+		if (children_range.first != children_range.second)
+		{
+			Transform_matrix const root_transform_matrix = 
+				entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+			update_child_transforms_aux(entity_manager, transforms_tree, root_transform_entity, root_transform_matrix, children_range);
+		}
 	}
 }

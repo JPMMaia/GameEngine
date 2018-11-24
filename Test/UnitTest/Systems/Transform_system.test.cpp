@@ -305,7 +305,7 @@ namespace Maia::GameEngine::Systems::Test
 							THEN("The child transform 0 is calculated correctly")
 							{
 								Transform_matrix const transform_matrix =
-									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+									entity_manager.get_component_data<Transform_matrix>(child_transform_entity_0);
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
@@ -320,13 +320,13 @@ namespace Maia::GameEngine::Systems::Test
 							THEN("The child transform 1 is calculated correctly")
 							{
 								Transform_matrix const transform_matrix =
-									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+									entity_manager.get_component_data<Transform_matrix>(child_transform_entity_1);
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
-									0.0f, 0.0f, 1.0f, -0.5f,
-									1.0f, 0.0f, 0.0f, -1.0f,
-									0.0f, 1.0f, 0.0f, -2.0f,
+									-1.0f, 0.0f, 0.0f, 2.5f,
+									0.0f, 0.0f, 1.0f, 0.0f,
+									0.0f, 1.0f, 0.0f, 0.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
 								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
@@ -335,13 +335,13 @@ namespace Maia::GameEngine::Systems::Test
 							THEN("The child transform 2 is calculated correctly")
 							{
 								Transform_matrix const transform_matrix =
-									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+									entity_manager.get_component_data<Transform_matrix>(child_transform_entity_2);
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
-									0.0f, -1.0f, 0.0f, -0.5f,
-									0.0f, 0.0f, -1.0f, -4.0f,
-									1.0f, 0.0f, 0.0f, 5.0f,
+									-1.0f, 0.0f, 0.0f, 2.0f,
+									0.0f, -1.0f, 0.0f, -4.0f,
+									0.0f, 0.0f, 1.0f, 5.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
 								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
@@ -350,13 +350,13 @@ namespace Maia::GameEngine::Systems::Test
 							THEN("The child transform 3 is calculated correctly")
 							{
 								Transform_matrix const transform_matrix =
-									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+									entity_manager.get_component_data<Transform_matrix>(child_transform_entity_3);
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
-									1.0f, 0.0f, 0.0f, -1.0f,
-									0.0f, 0.0f, -1.0f, 2.5f,
-									0.0f, 1.0f, 0.0f, 3.0f,
+									0.0f, 0.0f, 1.0f, 0.0f,
+									1.0f, 0.0f, 0.0f, -0.5f,
+									0.0f, 1.0f, 0.0f, 5.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
 								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
@@ -365,7 +365,7 @@ namespace Maia::GameEngine::Systems::Test
 							THEN("The child transform 4 is calculated correctly")
 							{
 								Transform_matrix const transform_matrix =
-									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+									entity_manager.get_component_data<Transform_matrix>(child_transform_entity_4);
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
