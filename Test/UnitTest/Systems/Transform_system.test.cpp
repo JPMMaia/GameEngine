@@ -211,12 +211,14 @@ namespace Maia::GameEngine::Systems::Test
 
 			AND_GIVEN("A root transform entity and 5 child transform entities")
 			{
+				float const pi = std::acos(-1.0f);
+
 				auto const root_transform_entity_type = entity_manager.create_entity_type<Position, Rotation, Transform_matrix>(1);
 
 				Entity const root_transform_entity = entity_manager.create_entity(
 					root_transform_entity_type,
 					Position{ { 1.0f, 2.0f, 3.0f } },
-					Rotation{ { 0.0f, 0.0f, 1.0f, 0.0f } },
+					Rotation{ { std::cos(pi / 4.0f), 0.0f, std::sin(pi / 4.0f), 0.0f } },
 					Transform_matrix{}
 				);
 
@@ -226,7 +228,7 @@ namespace Maia::GameEngine::Systems::Test
 				Entity const child_transform_entity_0 = entity_manager.create_entity(
 					child_transform_entity_type,
 					Position{ { -1.0f, 0.5f, -2.0f } },
-					Rotation{ { 0.0f, 1.0f, 0.0f, 0.0f } },
+					Rotation{ { std::cos(pi / 4.0f), std::sin(pi / 4.0f), 0.0f, 0.0f } },
 					Transform_matrix{},
 					Transform_root{ root_transform_entity },
 					Transform_parent{ root_transform_entity }
@@ -235,7 +237,7 @@ namespace Maia::GameEngine::Systems::Test
 				Entity const child_transform_entity_1 = entity_manager.create_entity(
 					child_transform_entity_type,
 					Position{ { 0.0f, 0.0f, 0.0f } },
-					Rotation{ { 0.0f, 0.0f, 0.0f, 1.0f } },
+					Rotation{ { std::cos(pi / 4.0f), 0.0f, 0.0f, std::sin(pi / 4.0f) } },
 					Transform_matrix{},
 					Transform_root{ root_transform_entity },
 					Transform_parent{ child_transform_entity_0 }
@@ -244,7 +246,7 @@ namespace Maia::GameEngine::Systems::Test
 				Entity const child_transform_entity_2 = entity_manager.create_entity(
 					child_transform_entity_type,
 					Position{ { -0.5f, -4.0f, 5.0f } },
-					Rotation{ { 0.0f, 1.0f, 0.0f, 0.0f } },
+					Rotation{ { std::cos(pi / 4.0f), std::sin(pi / 4.0f), 0.0f, 0.0f } },
 					Transform_matrix{},
 					Transform_root{ root_transform_entity },
 					Transform_parent{ child_transform_entity_1 }
@@ -262,7 +264,7 @@ namespace Maia::GameEngine::Systems::Test
 				Entity const child_transform_entity_4 = entity_manager.create_entity(
 					child_transform_entity_type,
 					Position{ { 0.0f, 0.0f, -3.0f } },
-					Rotation{ { 0.0f, 0.0f, 0.0f, 1.0f } },
+					Rotation{ { std::cos(pi / 4.0f), 0.0f, 0.0f, std::sin(pi / 4.0f) } },
 					Transform_matrix{},
 					Transform_root{ root_transform_entity },
 					Transform_parent{ root_transform_entity }
@@ -292,12 +294,12 @@ namespace Maia::GameEngine::Systems::Test
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
-									0.0f, 0.0f, -1.0f, 1.0f,
+									0.0f, 0.0f, 1.0f, 1.0f,
 									0.0f, 1.0f, 0.0f, 2.0f, 
-									1.0f, 0.0f, 0.0f, 3.0f, 
+									-1.0f, 0.0f, 0.0f, 3.0f, 
 									0.0f, 0.0f, 0.0f, 1.0f;
 
-								CHECK(transform_matrix.value == expected_transform_matrix);
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
 							}
 
 							THEN("The child transform 0 is calculated correctly")
@@ -307,12 +309,12 @@ namespace Maia::GameEngine::Systems::Test
 
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
-									0.0f, 0.0f, -1.0f, 0.0f,
-									-1.0f, 0.0f, 0.0f, -2.5f,
+									0.0f, 0.0f, 1.0f, 0.0f,
+									1.0f, 0.0f, 0.0f, -2.5f,
 									0.0f, 1.0f, 0.0f, 0.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
-								CHECK(transform_matrix.value == expected_transform_matrix);
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
 							}
 
 							THEN("The child transform 1 is calculated correctly")
@@ -327,7 +329,7 @@ namespace Maia::GameEngine::Systems::Test
 									0.0f, 1.0f, 0.0f, -2.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
-								CHECK(transform_matrix.value == expected_transform_matrix);
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
 							}
 
 							THEN("The child transform 2 is calculated correctly")
@@ -342,7 +344,7 @@ namespace Maia::GameEngine::Systems::Test
 									1.0f, 0.0f, 0.0f, 5.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
-								CHECK(transform_matrix.value == expected_transform_matrix);
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
 							}
 
 							THEN("The child transform 3 is calculated correctly")
@@ -357,7 +359,7 @@ namespace Maia::GameEngine::Systems::Test
 									0.0f, 1.0f, 0.0f, 3.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
-								CHECK(transform_matrix.value == expected_transform_matrix);
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
 							}
 
 							THEN("The child transform 4 is calculated correctly")
@@ -368,11 +370,11 @@ namespace Maia::GameEngine::Systems::Test
 								Eigen::Matrix4f expected_transform_matrix;
 								expected_transform_matrix <<
 									0.0f, -1.0f, 0.0f, -2.0f,
-									0.0f, 0.0f, -1.0f, 1.0f,
-									1.0f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.0f, 1.0f, 1.0f,
+									-1.0f, 0.0f, 0.0f, 0.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
-								CHECK(transform_matrix.value == expected_transform_matrix);
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
 							}
 						}
 					}
