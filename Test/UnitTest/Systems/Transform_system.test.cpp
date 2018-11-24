@@ -202,4 +202,182 @@ namespace Maia::GameEngine::Systems::Test
 			}
 		}
 	}
+
+	SCENARIO("Create a transform tree and update transforms")
+	{
+		GIVEN("An entity manager")
+		{
+			Entity_manager entity_manager{};
+
+			AND_GIVEN("A root transform entity and 5 child transform entities")
+			{
+				auto const root_transform_entity_type = entity_manager.create_entity_type<Position, Rotation, Transform_matrix>(1);
+
+				Entity const root_transform_entity = entity_manager.create_entity(
+					root_transform_entity_type,
+					Position{ { 1.0f, 2.0f, 3.0f } },
+					Rotation{ { 0.0f, 0.0f, 1.0f, 0.0f } },
+					Transform_matrix{}
+				);
+
+
+				auto const child_transform_entity_type = entity_manager.create_entity_type<Position, Rotation, Transform_matrix, Transform_root, Transform_parent>(5);
+
+				Entity const child_transform_entity_0 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { -1.0f, 0.5f, -2.0f } },
+					Rotation{ { 0.0f, 1.0f, 0.0f, 0.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ root_transform_entity }
+				);
+
+				Entity const child_transform_entity_1 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { 0.0f, 0.0f, 0.0f } },
+					Rotation{ { 0.0f, 0.0f, 0.0f, 1.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ child_transform_entity_0 }
+				);
+
+				Entity const child_transform_entity_2 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { -0.5f, -4.0f, 5.0f } },
+					Rotation{ { 0.0f, 1.0f, 0.0f, 0.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ child_transform_entity_1 }
+				);
+
+				Entity const child_transform_entity_3 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { 0.0f, 2.0f, 5.0f } },
+					Rotation{ { 1.0f, 0.0f, 0.0f, 0.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ child_transform_entity_0 }
+				);
+
+				Entity const child_transform_entity_4 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { 0.0f, 0.0f, -3.0f } },
+					Rotation{ { 0.0f, 0.0f, 0.0f, 1.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ root_transform_entity }
+				);
+
+				WHEN("The root transform is updated")
+				{
+					{
+						auto[position, rotation] = entity_manager.get_components_data<Position, Rotation>(root_transform_entity);
+						Transform_matrix const root_transform_matrix = create_transform(position, rotation);
+						entity_manager.set_component_data(root_transform_entity, root_transform_matrix);
+					}
+
+					AND_WHEN("The transform tree is created")
+					{
+						Transforms_tree const transform_tree =
+							create_transforms_tree(entity_manager, root_transform_entity);
+
+						AND_WHEN("The child transforms are updated")
+						{
+							update_child_transforms(entity_manager, transform_tree, root_transform_entity);
+
+							THEN("The root transform is calculated correctly")
+							{
+								Transform_matrix const transform_matrix = 
+									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									0.0f, 0.0f, -1.0f, 1.0f,
+									0.0f, 1.0f, 0.0f, 2.0f, 
+									1.0f, 0.0f, 0.0f, 3.0f, 
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value == expected_transform_matrix);
+							}
+
+							THEN("The child transform 0 is calculated correctly")
+							{
+								Transform_matrix const transform_matrix =
+									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									0.0f, 0.0f, -1.0f, 0.0f,
+									-1.0f, 0.0f, 0.0f, -2.5f,
+									0.0f, 1.0f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value == expected_transform_matrix);
+							}
+
+							THEN("The child transform 1 is calculated correctly")
+							{
+								Transform_matrix const transform_matrix =
+									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									0.0f, 0.0f, 1.0f, -0.5f,
+									1.0f, 0.0f, 0.0f, -1.0f,
+									0.0f, 1.0f, 0.0f, -2.0f,
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value == expected_transform_matrix);
+							}
+
+							THEN("The child transform 2 is calculated correctly")
+							{
+								Transform_matrix const transform_matrix =
+									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									0.0f, -1.0f, 0.0f, -0.5f,
+									0.0f, 0.0f, -1.0f, -4.0f,
+									1.0f, 0.0f, 0.0f, 5.0f,
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value == expected_transform_matrix);
+							}
+
+							THEN("The child transform 3 is calculated correctly")
+							{
+								Transform_matrix const transform_matrix =
+									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									1.0f, 0.0f, 0.0f, -1.0f,
+									0.0f, 0.0f, -1.0f, 2.5f,
+									0.0f, 1.0f, 0.0f, 3.0f,
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value == expected_transform_matrix);
+							}
+
+							THEN("The child transform 4 is calculated correctly")
+							{
+								Transform_matrix const transform_matrix =
+									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									0.0f, -1.0f, 0.0f, -2.0f,
+									0.0f, 0.0f, -1.0f, 1.0f,
+									1.0f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value == expected_transform_matrix);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
