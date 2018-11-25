@@ -90,17 +90,70 @@ namespace Maia::GameEngine::Systems
 	void update_child_transforms(
 		Entity_manager& entity_manager,
 		Transforms_tree const& transforms_tree,
-		Entity root_transform_entity
+		Entity root_transform_entity,
+		Transform_matrix const& root_transform_matrix
 	)
 	{
 		auto const children_range = transforms_tree.equal_range({ root_transform_entity });
+		update_child_transforms_aux(entity_manager, transforms_tree, root_transform_entity, root_transform_matrix, children_range);
+	}
 
-		if (children_range.first != children_range.second)
+	namespace
+	{
+		void update_transform_tree(Entity_manager& entity_manager, Entity const root_entity, Position const root_position, Rotation const root_rotation)
 		{
-			Transform_matrix const root_transform_matrix = 
-				entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+			Transform_matrix const root_transform = create_transform(root_position, root_rotation);
+			entity_manager.set_component_data(root_entity, root_transform);
 
-			update_child_transforms_aux(entity_manager, transforms_tree, root_transform_entity, root_transform_matrix, children_range);
+			Transforms_tree const transforms_tree = create_transforms_tree(entity_manager, root_entity);
+
+			update_child_transforms(entity_manager, transforms_tree, root_entity, root_transform);
+		}
+	}
+	void Transform_system::execute(Entity_manager& entity_manager)
+	{
+		gsl::span<Component_types_group const> const component_types_groups =
+			entity_manager.get_component_types_groups();
+
+		gsl::span<Component_group> const component_groups =
+			entity_manager.get_component_groups();
+
+		for (std::ptrdiff_t component_group_index = 0; component_group_index < component_groups.size(); ++component_group_index)
+		{
+			Component_types_group const component_types = component_types_groups[component_group_index];
+
+			if (component_types.contains<Transform_tree_dirty>())
+			{
+				Component_group& component_group = component_groups[component_group_index];
+
+				for (std::size_t chunk_index = 0; chunk_index < component_group.num_chunks(); ++chunk_index)
+				{
+					gsl::span<Entity const> entities
+						= component_group.components<Entity>(chunk_index);
+
+					gsl::span<Position const> positions
+						= component_group.components<Position>(chunk_index);
+
+					gsl::span<Rotation const> rotations
+						= component_group.components<Rotation>(chunk_index);
+
+					gsl::span<Transform_tree_dirty> transform_trees_dirty 
+						= component_group.components<Transform_tree_dirty>(chunk_index);
+
+					for (std::ptrdiff_t component_index = 0; component_index < transform_trees_dirty.size(); ++component_index)
+					{
+						if (transform_trees_dirty[component_index].value)
+						{
+							// TODO Create a new thread
+							{
+								update_transform_tree(entity_manager, entities[component_index], positions[component_index], rotations[component_index]);
+							}
+
+							transform_trees_dirty[component_index].value = false;
+						}
+					}
+				}
+			}
 		}
 	}
 }

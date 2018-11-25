@@ -33,9 +33,9 @@ namespace Maia::GameEngine::Systems
 		}
 	};
 
-	struct Transform_dirty
+	struct Transform_tree_dirty
 	{
-		bool value;
+		bool value{ true };
 
 		static Component_ID ID()
 		{
@@ -83,6 +83,20 @@ namespace Maia::GameEngine::Systems
 		}
 	};
 
+	inline bool operator==(Transform_matrix const& lhs, Transform_matrix const& rhs)
+	{
+		return lhs.value.isApprox(rhs.value);
+	}
+	inline bool operator!=(Transform_matrix const& lhs, Transform_matrix const& rhs)
+	{
+		return !(lhs == rhs);
+	}
+	inline std::ostream& operator<<(std::ostream& outputStream, Transform_matrix const& value)
+	{
+		outputStream << value.value;
+		return outputStream;
+	}
+
 	using Transforms_tree = std::unordered_multimap<Transform_parent, Entity>;
 }
 
@@ -114,7 +128,8 @@ namespace Maia::GameEngine::Systems
 	void update_child_transforms(
 		Entity_manager& entity_manager,
 		Transforms_tree const& transforms_tree,
-		Entity root_transform_entity
+		Entity root_transform_entity,
+		Transform_matrix const& root_transform_matrix
 	);
 
 
@@ -122,54 +137,11 @@ namespace Maia::GameEngine::Systems
 	{
 	public:
 
-		std::future<void> execute_async()
-		{
-			// Go through all entities that have a Position, Rotation and not have a Transform_parent
-			{
-				// Create a new thread
-				{
-					// build_root_transform(position, rotation);
+		void execute(Entity_manager& entity_manager);
 
-					// build_transformation_tree
-				}
-			}
-
-			return {};
-		}
-
-	private:
-
-		// For each root matrix, create a thread
-
-		// Called for each thread
-
-		void build_root_transform()
-		{
-			// Write to root transform
-		}
-
-		std::unordered_multimap<Transform_parent, Entity> build_transformation_tree(Entity root_transform_entity)
-		{
-			// Go through all entities that have a Position, Rotation and a Transform_parent
-			// Add entity to multimap by parent
-
-			return {};
-		}
-
-		void build_non_root_transforms(Entity root_transform_entity)
-		{
-			// auto children = hash_map[root_transform.entity];
-
-			// For each child in children
-			{
-				// write to child transform
-			}
-
-			// For each child in children
-			{
-				// build_non_root_transforms(child.entity);
-			}
-		}
+		// void execute(ThreadPool& thread_pool, Entity_manager& entity_manager);
+		
+		// std::future<void> execute_async(Entity_manager& entity_manager);
 	};
 }
 

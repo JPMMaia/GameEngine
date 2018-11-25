@@ -270,12 +270,21 @@ namespace Maia::GameEngine::Systems::Test
 					Transform_parent{ root_transform_entity }
 				);
 
-				WHEN("The root transform is updated")
+				WHEN("The root transform is created")
 				{
+					auto[root_position, root_rotation] = entity_manager.get_components_data<Position, Rotation>(root_transform_entity);
+					Transform_matrix const root_transform_matrix = create_transform(root_position, root_rotation);
+					
+					THEN("The root transform is calculated correctly")
 					{
-						auto[position, rotation] = entity_manager.get_components_data<Position, Rotation>(root_transform_entity);
-						Transform_matrix const root_transform_matrix = create_transform(position, rotation);
-						entity_manager.set_component_data(root_transform_entity, root_transform_matrix);
+						Eigen::Matrix4f expected_transform_matrix;
+						expected_transform_matrix <<
+							0.0f, 0.0f, 1.0f, 1.0f,
+							0.0f, 1.0f, 0.0f, 2.0f,
+							-1.0f, 0.0f, 0.0f, 3.0f,
+							0.0f, 0.0f, 0.0f, 1.0f;
+
+						CHECK(root_transform_matrix.value.isApprox(expected_transform_matrix));
 					}
 
 					AND_WHEN("The transform tree is created")
@@ -285,22 +294,7 @@ namespace Maia::GameEngine::Systems::Test
 
 						AND_WHEN("The child transforms are updated")
 						{
-							update_child_transforms(entity_manager, transform_tree, root_transform_entity);
-
-							THEN("The root transform is calculated correctly")
-							{
-								Transform_matrix const transform_matrix = 
-									entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
-
-								Eigen::Matrix4f expected_transform_matrix;
-								expected_transform_matrix <<
-									0.0f, 0.0f, 1.0f, 1.0f,
-									0.0f, 1.0f, 0.0f, 2.0f, 
-									-1.0f, 0.0f, 0.0f, 3.0f, 
-									0.0f, 0.0f, 0.0f, 1.0f;
-
-								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
-							}
+							update_child_transforms(entity_manager, transform_tree, root_transform_entity, root_transform_matrix);
 
 							THEN("The child transform 0 is calculated correctly")
 							{
@@ -372,6 +366,148 @@ namespace Maia::GameEngine::Systems::Test
 									0.0f, -1.0f, 0.0f, -2.0f,
 									0.0f, 0.0f, 1.0f, 1.0f,
 									-1.0f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.0f, 1.0f;
+
+								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	SCENARIO("Execute transform system, check if transforms are correct and manipulate transform_dirty flags")
+	{
+		GIVEN("An entity manager")
+		{
+			Entity_manager entity_manager{};
+
+			AND_GIVEN("A root transform entity with a dirty flag and two child transforms")
+			{
+				auto const root_transform_entity_type = entity_manager.create_entity_type<Position, Rotation, Transform_matrix, Transform_tree_dirty>(1);
+
+				Entity const root_transform_entity = entity_manager.create_entity(
+					root_transform_entity_type,
+					Position{ { 1.0f, 0.0f, 0.0f } },
+					Rotation{ { 1.0f, 0.0f, 0.0f, 0.0f } },
+					Transform_matrix{},
+					Transform_tree_dirty{ true }
+				);
+
+
+				auto const child_transform_entity_type = entity_manager.create_entity_type<Position, Rotation, Transform_matrix, Transform_root, Transform_parent>(2);
+
+				Entity const child_transform_entity_0 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { 0.0f, 2.0f, 0.0f } },
+					Rotation{ { 1.0f, 0.0f, 0.0f, 0.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ root_transform_entity }
+				);
+
+				Entity const child_transform_entity_1 = entity_manager.create_entity(
+					child_transform_entity_type,
+					Position{ { 0.0f, 0.0f, 3.0f } },
+					Rotation{ { 1.0f, 0.0f, 0.0f, 0.0f } },
+					Transform_matrix{},
+					Transform_root{ root_transform_entity },
+					Transform_parent{ child_transform_entity_0 }
+				);
+
+
+				WHEN("The transform system is executed")
+				{
+					Transform_system transform_system;
+					transform_system.execute(entity_manager);
+
+					THEN("The transform_tree_dirty flag is false")
+					{
+						Transform_tree_dirty const transform_tree_dirty =
+							entity_manager.get_component_data<Transform_tree_dirty>(root_transform_entity);
+
+						CHECK(transform_tree_dirty.value == false);
+					}
+
+					THEN("The root transform is calculated correctly")
+					{
+						Transform_matrix const transform_matrix =
+							entity_manager.get_component_data<Transform_matrix>(root_transform_entity);
+
+						Eigen::Matrix4f expected_transform_matrix;
+						expected_transform_matrix <<
+							1.0f, 0.0f, 0.0f, 1.0f,
+							0.0f, 1.0f, 0.0f, 0.0f,
+							0.0f, 0.0f, 1.0f, 0.0f,
+							0.0f, 0.0f, 0.0f, 1.0f;
+
+						CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
+					}
+
+					THEN("The child transform 0 is calculated correctly")
+					{
+						Transform_matrix const transform_matrix =
+							entity_manager.get_component_data<Transform_matrix>(child_transform_entity_0);
+
+						Eigen::Matrix4f expected_transform_matrix;
+						expected_transform_matrix <<
+							1.0f, 0.0f, 0.0f, 1.0f,
+							0.0f, 1.0f, 0.0f, 2.0f,
+							0.0f, 0.0f, 1.0f, 0.0f,
+							0.0f, 0.0f, 0.0f, 1.0f;
+
+						CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
+					}
+
+					THEN("The child transform 1 is calculated correctly")
+					{
+						Transform_matrix const transform_matrix =
+							entity_manager.get_component_data<Transform_matrix>(child_transform_entity_1);
+
+						Eigen::Matrix4f expected_transform_matrix;
+						expected_transform_matrix <<
+							1.0f, 0.0f, 0.0f, 1.0f,
+							0.0f, 1.0f, 0.0f, 2.0f,
+							0.0f, 0.0f, 1.0f, 3.0f,
+							0.0f, 0.0f, 0.0f, 1.0f;
+
+						CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
+					}
+
+					AND_WHEN("The child transform 1 position is updated, but the transform_tree_dirty flag remains false")
+					{
+						Transform_matrix const original_transform_matrix =
+							entity_manager.get_component_data<Transform_matrix>(child_transform_entity_1);
+
+						entity_manager.set_component_data(child_transform_entity_1, Position{ { 0.0f, 0.0f, 6.0f } });
+
+						transform_system.execute(entity_manager);
+
+						THEN("The child transform 1 is not updated")
+						{
+							Transform_matrix const current_transform_matrix =
+								entity_manager.get_component_data<Transform_matrix>(child_transform_entity_1);
+
+							CHECK(current_transform_matrix == original_transform_matrix);
+						}
+
+						AND_WHEN("The transform_tree_dirty flag is set to true")
+						{
+							entity_manager.set_component_data(root_transform_entity, Transform_tree_dirty{ true });
+
+							transform_system.execute(entity_manager);
+
+							THEN("The child transform 1 is updated")
+							{
+								Transform_matrix const transform_matrix =
+									entity_manager.get_component_data<Transform_matrix>(child_transform_entity_1);
+
+								Eigen::Matrix4f expected_transform_matrix;
+								expected_transform_matrix <<
+									1.0f, 0.0f, 0.0f, 1.0f,
+									0.0f, 1.0f, 0.0f, 2.0f,
+									0.0f, 0.0f, 1.0f, 6.0f,
 									0.0f, 0.0f, 0.0f, 1.0f;
 
 								CHECK(transform_matrix.value.isApprox(expected_transform_matrix));
