@@ -19,7 +19,7 @@ target_include_directories (MaiaGameEngine
 		$<INSTALL_INTERFACE:include/Maia/GameEngine>
 )
 
-find_package (Eigen3 REQUIRED)
+find_package (Eigen3 3.3 NO_MODULE REQUIRED)
 target_link_libraries (MaiaGameEngine PUBLIC Eigen3::Eigen)
 
 find_package (GSL REQUIRED)
