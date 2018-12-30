@@ -10,29 +10,11 @@
 
 #include <Maia/GameEngine/Entity.hpp>
 #include <Maia/GameEngine/Entity_manager.hpp>
+#include <Maia/GameEngine/Components/Position.hpp>
+#include <Maia/GameEngine/Components/Rotation.hpp>
 
 namespace Maia::GameEngine::Systems
 {
-	struct Position
-	{
-		Eigen::Vector3f value{ 0.0f, 0.0f, 0.0f };
-
-		static Component_ID ID()
-		{
-			return { 1 };
-		}
-	};
-
-	struct Rotation
-	{
-		Eigen::Quaternionf value{ 1.0f, 0.0f, 0.0f, 0.0f };
-
-		static Component_ID ID()
-		{
-			return { 2 };
-		}
-	};
-
 	struct Transform_tree_dirty
 	{
 		bool value{ true };
@@ -118,6 +100,9 @@ namespace std
 
 namespace Maia::GameEngine::Systems
 {
+	using Position = Components::Position;
+	using Rotation = Components::Rotation;
+
 	Transform_matrix create_transform(Position const& position, Rotation const& rotation);
 
 	Transforms_tree create_transforms_tree(
