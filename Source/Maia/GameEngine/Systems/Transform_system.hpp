@@ -10,8 +10,8 @@
 
 #include <Maia/GameEngine/Entity.hpp>
 #include <Maia/GameEngine/Entity_manager.hpp>
-#include <Maia/GameEngine/Components/Position.hpp>
-#include <Maia/GameEngine/Components/Rotation.hpp>
+#include <Maia/GameEngine/Components/Local_position.hpp>
+#include <Maia/GameEngine/Components/Local_rotation.hpp>
 
 namespace Maia::GameEngine::Systems
 {
@@ -100,10 +100,10 @@ namespace std
 
 namespace Maia::GameEngine::Systems
 {
-	using Position = Components::Position;
-	using Rotation = Components::Rotation;
+	using Local_position = Components::Local_position;
+	using Local_rotation = Components::Local_rotation;
 
-	Transform_matrix create_transform(Position const& position, Rotation const& rotation);
+	Transform_matrix create_transform(Local_position const& position, Local_rotation const& rotation);
 
 	Transforms_tree create_transforms_tree(
 		Entity_manager const& entity_manager,

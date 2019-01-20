@@ -2,7 +2,7 @@
 
 namespace Maia::GameEngine::Systems
 {
-	Transform_matrix create_transform(Position const& position, Rotation const& rotation)
+	Transform_matrix create_transform(Local_position const& position, Local_rotation const& rotation)
 	{
 		Eigen::Vector3f const& translation = position.value;
 		Eigen::Matrix3f const rotation_matrix = rotation.value.matrix();
@@ -74,7 +74,7 @@ namespace Maia::GameEngine::Systems
 			{
 				Entity const child_entity = it->second;
 
-				auto const[position, rotation] = entity_manager.get_components_data<Position, Rotation>(child_entity);
+				auto const[position, rotation] = entity_manager.get_components_data<Local_position, Local_rotation>(child_entity);
 
 				Transform_matrix const local_transform_matrix = create_transform(position, rotation);
 
@@ -100,7 +100,7 @@ namespace Maia::GameEngine::Systems
 
 	namespace
 	{
-		void update_transform_tree(Entity_manager& entity_manager, Entity const root_entity, Position const root_position, Rotation const root_rotation)
+		void update_transform_tree(Entity_manager& entity_manager, Entity const root_entity, Local_position const root_position, Local_rotation const root_rotation)
 		{
 			Transform_matrix const root_transform = create_transform(root_position, root_rotation);
 			entity_manager.set_component_data(root_entity, root_transform);
@@ -131,11 +131,11 @@ namespace Maia::GameEngine::Systems
 					gsl::span<Entity const> entities
 						= component_group.components<Entity>(chunk_index);
 
-					gsl::span<Position const> positions
-						= component_group.components<Position>(chunk_index);
+					gsl::span<Local_position const> positions
+						= component_group.components<Local_position>(chunk_index);
 
-					gsl::span<Rotation const> rotations
-						= component_group.components<Rotation>(chunk_index);
+					gsl::span<Local_rotation const> rotations
+						= component_group.components<Local_rotation>(chunk_index);
 
 					gsl::span<Transform_tree_dirty> transform_trees_dirty 
 						= component_group.components<Transform_tree_dirty>(chunk_index);
