@@ -32,12 +32,18 @@ target_sources (MaiaGameEngine
 		"Maia/GameEngine/Component_types_group.hpp"
 		"Maia/GameEngine/Entity.hpp"
 		"Maia/GameEngine/Entity_manager.hpp"
+		"Maia/GameEngine/Entity_manager.cpp"
 		"Maia/GameEngine/Entity_type.hpp"
 		
 		"Maia/GameEngine/Components/Local_position.hpp"
 		"Maia/GameEngine/Components/Local_rotation.hpp"
 		"Maia/GameEngine/Systems/Transform_system.hpp"
 		"Maia/GameEngine/Systems/Transform_system.cpp"
+)
+
+target_sources (MaiaGameEngine 
+	PUBLIC
+		"${CMAKE_CURRENT_LIST_DIR}/Maia/GameEngine/Component_group.natvis"
 )
 
 

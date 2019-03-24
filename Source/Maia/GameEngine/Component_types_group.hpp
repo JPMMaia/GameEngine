@@ -8,6 +8,13 @@ namespace Maia::GameEngine
 {
     struct Component_types_group
 	{
+	private:
+
+		template <typename T>
+		using Remove_cvr_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+	public:
+
 		using Mask = std::bitset<64>;
 
 		Mask mask;
@@ -16,7 +23,7 @@ namespace Maia::GameEngine
 		bool contains() const
 		{
 			Mask include_mask;
-			(include_mask.set(Component::ID().value), ...);
+			(include_mask.set(Remove_cvr_t<Component>::ID().value), ...);
 
 			return (mask & include_mask) == include_mask;
 		}

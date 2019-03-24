@@ -104,7 +104,7 @@ namespace Maia::GameEngine
 		using Element_moved = Component_group_element_moved;
 
 
-		Component_group(gsl::span<Component_info> component_infos, std::size_t capacity_per_chunk) :
+		Component_group(gsl::span<Component_info const> const component_infos, std::size_t const capacity_per_chunk) :
 			m_size{ 0 },
 			m_size_of_single_element{ calculate_size_of_single_element(component_infos) },
 			m_capacity_per_chunk{ capacity_per_chunk },
@@ -328,7 +328,7 @@ namespace Maia::GameEngine
 			Component_size size;
 		};
 
-		static std::size_t calculate_size_of_single_element(gsl::span<Component_info> const component_infos)
+		static std::size_t calculate_size_of_single_element(gsl::span<Component_info const> const component_infos)
 		{
 			std::size_t size_of_single_element{ 0 };
 
@@ -340,7 +340,7 @@ namespace Maia::GameEngine
 			return size_of_single_element;
 		}
 
-		static std::vector<Component_offset_and_size> create_component_offsets_and_sizes(gsl::span<Component_info> const component_infos, std::size_t const capacity_per_chunk)
+		static std::vector<Component_offset_and_size> create_component_offsets_and_sizes(gsl::span<Component_info const> const component_infos, std::size_t const capacity_per_chunk)
 		{
 			std::vector<Component_offset_and_size> component_offset_and_sizes;
 			component_offset_and_sizes.reserve(component_infos.size());
