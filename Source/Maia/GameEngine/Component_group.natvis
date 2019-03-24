@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Maia::GameEngine::Component_group">
+    <DisplayString>{ Component_group value }</DisplayString>
+    <Expand>
+      <Item Name="[size]" ExcludeView="simple">m_size</Item>
+      <ArrayItems>
+        <Size>m_chunks._Mylast - m_chunks._Myfirst</Size>
+        <ValuePointer>m_chunks._Myfirst</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>
