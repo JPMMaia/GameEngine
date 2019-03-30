@@ -1,3 +1,5 @@
+#include <optional>
+
 #include <catch2/catch.hpp>
 
 #include <Test_components.hpp>
@@ -28,7 +30,7 @@ namespace Maia::GameEngine::Test
 				Position const original_position{ 2.0f, 0.5f, -1.0f };
 				Rotation const original_rotation{ 0.1f, 0.2f, 0.3f, 1.0f };
 
-				auto const index = component_group.push_back(original_entity, original_position, original_rotation);
+				Component_group::Index const index = component_group.push_back(original_entity, original_position, original_rotation);
 
 				THEN("The returned index should be equals to 0")
 				{
@@ -213,54 +215,14 @@ namespace Maia::GameEngine::Test
 							CHECK(component_group.capacity() == 4);
 						}
 
-						AND_WHEN("Element 0 is removed using templated overload")
+						AND_WHEN("Element 0 is erased")
 						{
-							Component_group_element_moved element_moved_data = component_group.erase<Entity, Position, Rotation>({ 0 });
+							std::optional<Component_group_entity_moved> entity_moved_data = component_group.erase({ 0 });
 
 							THEN("The moved element was the element at the back")
 							{
-								CHECK(element_moved_data.entity == entity2);
-
-								auto [entity, position, rotation] = component_group.get_components_data<Entity, Position, Rotation>({ 0 });
-								CHECK(entity == entity2);
-								CHECK(position == position2);
-								CHECK(rotation == rotation2);
-							}
-
-							THEN("The component group size is 2")
-							{
-								CHECK(component_group.size() == 2);
-							}
-
-							THEN("The component group capacity is 4")
-							{
-								CHECK(component_group.capacity() == 4);
-							}
-
-							AND_WHEN("The component group shrinks to fit")
-							{
-								component_group.shrink_to_fit();
-
-								THEN("The component group size is 2")
-								{
-									CHECK(component_group.size() == 2);
-								}
-
-								THEN("The component group capacity is 2")
-								{
-									CHECK(component_group.capacity() == 2);
-								}
-							}
-						}
-
-						AND_WHEN("Element 0 is removed using non-templated overload")
-						{
-							std::optional<Component_group_element_moved> element_moved_data = component_group.erase({ 0 });
-
-							THEN("The moved element was the element at the back")
-							{
-								REQUIRE(element_moved_data.has_value());
-								CHECK(element_moved_data.value().entity == entity2);
+								REQUIRE(entity_moved_data.has_value());
+								CHECK(entity_moved_data.value().entity == entity2);
 
 								auto[entity, position, rotation] = component_group.get_components_data<Entity, Position, Rotation>({ 0 });
 								CHECK(entity == entity2);
@@ -295,13 +257,13 @@ namespace Maia::GameEngine::Test
 
 							AND_WHEN("Removing the remaining elements")
 							{
-								std::optional<Component_group_element_moved> element_moved_data_1 = component_group.erase({ 0 });
-								std::optional<Component_group_element_moved> element_moved_data_2 = component_group.erase({ 0 });
+								std::optional<Component_group_entity_moved> entity_moved_data_1 = component_group.erase({ 0 });
+								std::optional<Component_group_entity_moved> entity_moved_data_2 = component_group.erase({ 0 });
 
 								THEN("One of the elements should be moved, and the last one not")
 								{
-									CHECK(element_moved_data_1.has_value());
-									CHECK(!element_moved_data_2.has_value());
+									CHECK(entity_moved_data_1.has_value());
+									CHECK(!entity_moved_data_2.has_value());
 								}
 
 							}
