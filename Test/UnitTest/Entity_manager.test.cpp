@@ -24,7 +24,7 @@ namespace Maia::GameEngine::Test
 
 				WHEN("The entity type is created")
 				{
-					Entity_type_id const entity_type_id = entity_manager.create_entity_type<Position>(2);
+					Entity_type_id const entity_type_id = entity_manager.create_entity_type<Position, Entity>(2, Space{ 0 });
 
 					AND_WHEN("The entity is created with a given position data")
 					{
@@ -78,9 +78,9 @@ namespace Maia::GameEngine::Test
 
 			AND_GIVEN("Three different entity types: Position, Rotation and Position_rotation")
 			{
-				Entity_type_id const position_entity_type_id = entity_manager.create_entity_type<Position>(2);
-				Entity_type_id const rotation_entity_type_id = entity_manager.create_entity_type<Rotation>(2);
-				Entity_type_id const position_rotation_entity_type_id = entity_manager.create_entity_type<Position, Rotation>(2);
+				Entity_type_id const position_entity_type_id = entity_manager.create_entity_type<Position, Entity>(2, Space{ 0 });
+				Entity_type_id const rotation_entity_type_id = entity_manager.create_entity_type<Rotation, Entity>(2, Space{ 0 });
+				Entity_type_id const position_rotation_entity_type_id = entity_manager.create_entity_type<Position, Rotation, Entity>(2, Space{ 0 });
 
 				WHEN("Three entities of each entity type are created")
 				{
@@ -272,7 +272,7 @@ namespace Maia::GameEngine::Test
 
 			WHEN("Nine entities of Position entity type are created")
 			{
-				Entity_type_id const position_entity_type = entity_manager.create_entity_type<Position>(2);
+				Entity_type_id const position_entity_type = entity_manager.create_entity_type<Position, Entity>(2, Space{ 0 });
 
 				std::array<Entity, 3> const position_entities_group_1
 				{
@@ -341,7 +341,7 @@ namespace Maia::GameEngine::Test
 
 					AND_WHEN("Nine more entities are created, this time with a Rotation component")
 					{
-						Entity_type_id const rotation_entity_type = entity_manager.create_entity_type<Rotation>(2);
+						Entity_type_id const rotation_entity_type = entity_manager.create_entity_type<Rotation, Entity>(2, Space{ 0 });
 
 						std::array<Entity, 3> const rotation_entities_group_1
 						{
@@ -424,7 +424,7 @@ namespace Maia::GameEngine::Test
 
 			WHEN("Three entities of Position entity type are created")
 			{
-				Entity_type_id const position_entity_type = entity_manager.create_entity_type<Position>(2);
+				Entity_type_id const position_entity_type = entity_manager.create_entity_type<Position, Entity>(2, Space{ 0 });
 
 				std::array<Entity, 3> entities = entity_manager.create_entities<3>(position_entity_type, Position{});
 

@@ -26,7 +26,7 @@ namespace Maia::GameEngine
 		template <class Component>
 		static Component_ID get()
 		{
-			using Raw_component = std::remove_cv_t<std::remove_reference_t<Component>>;
+			using Raw_component = typename std::remove_cv_t<typename std::remove_reference_t<Component>>;
 
 			return get_impl<Raw_component>();
 		}
@@ -54,6 +54,16 @@ namespace Maia::GameEngine
 		Component_ID id;
 		Component_size size;
 	};
+
+	template <class Component>
+	Component_info create_component_info()
+	{
+		return 
+		{
+			Component_ID::get<Component>(),
+			{ sizeof(Component) }
+		};
+	}
 }
 
 #endif

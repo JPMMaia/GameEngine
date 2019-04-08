@@ -10,7 +10,6 @@ namespace Maia::GameEngine
 		Space const space
 	)
 	{
-
 		Component_group_mask const component_types_mask = [&component_infos]() -> Component_group_mask
 		{
 			Component_group_mask component_types_mask = {};
@@ -22,6 +21,8 @@ namespace Maia::GameEngine
 
 			return component_types_mask;
 		}();
+
+		assert(component_types_mask.contains<Entity>());
 
 		std::optional<std::size_t> const match_index = [this, &space, &component_types_mask]() -> std::optional<std::size_t>
 		{

@@ -1,5 +1,7 @@
 #include <Maia/GameEngine/Systems/Transform_system.hpp>
 
+#include <iostream>
+
 namespace Maia::GameEngine::Systems
 {
 	Transform_matrix create_transform(Local_position const& position, Local_rotation const& rotation)
@@ -78,7 +80,7 @@ namespace Maia::GameEngine::Systems
 
 				Transform_matrix const local_transform_matrix = create_transform(position, rotation);
 
-				Transform_matrix const world_transform_matrix{ local_transform_matrix.value * root_transform_matrix.value };
+				Transform_matrix const world_transform_matrix{ root_transform_matrix.value * local_transform_matrix.value };
 				entity_manager.set_component_data(child_entity, world_transform_matrix);
 
 				auto const children_of_child_range = transforms_tree.equal_range({ child_entity });

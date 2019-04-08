@@ -40,7 +40,7 @@ namespace Maia::GameEngine
 
 
 	template <typename... Components>
-	Component_group_mask make_component_grou_mask()
+	Component_group_mask make_component_group_mask()
 	{
 		Component_group_mask component_types_group;
 

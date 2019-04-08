@@ -46,23 +46,22 @@ namespace Maia::GameEngine
 		Entity_type_id create_entity_type(
 			std::size_t capacity_per_chunk,
 			gsl::span<Component_info const> component_infos,
-			Space const space
+			Space space
 		);
 
 		template <typename... Components>
-		Entity_type_id create_entity_type(std::size_t capacity_per_chunk)
+		Entity_type_id create_entity_type(
+			std::size_t const capacity_per_chunk,
+			Space const space
+		)
 		{
-			m_component_groups.emplace_back(
-				make_component_group<Components..., Entity>(capacity_per_chunk));
+			// TODO replace by std::array
+			std::vector<Maia::GameEngine::Component_info> component_infos
+			{
+				create_component_info<Components>()...
+			};
 
-			m_component_group_masks.emplace_back(
-				make_component_grou_mask<Components..., Entity>()
-			);
-
-			Entity_type_id const entity_type_id{ m_entity_type_ids.size() };
-			m_entity_type_ids.push_back(entity_type_id);
-
-			return entity_type_id;
+			return create_entity_type(capacity_per_chunk, component_infos, space);
 		}
 		
 
@@ -210,7 +209,7 @@ namespace Maia::GameEngine
 		template <typename Component>
 		void set_component_data(Entity entity, Component&& data)
 		{
-			assert(m_component_group_masks[m_entity_type_indices[entity.value].value].contains<Component>());
+			assert(m_component_group_masks[m_entity_type_indices[entity.value].value].contains<Component>() && "Missing component!");
 
 			Entity_type_index entity_type_index = m_entity_type_indices[entity.value];
 			Component_group& component_group = m_component_groups[entity_type_index.value];
@@ -240,13 +239,21 @@ namespace Maia::GameEngine
 			component_group.set_components_data<Components...>(component_group_index, std::forward<Components>(data)...);
 		}
 
-		Component_group const& get_component_group(Entity_type_id entity_type_id) const
+		Component_group const& get_component_group(Entity_type_id const entity_type_id) const
 		{
-			return m_component_groups.back();
+			assert(entity_type_id.value == m_entity_type_ids[entity_type_id.value].value);
+
+			Entity_type_index const entity_type_index = { entity_type_id.value };
+
+			return m_component_groups[entity_type_index.value];
 		}
-		Component_group& get_component_group(Entity_type_id entity_type_id)
+		Component_group& get_component_group(Entity_type_id const entity_type_id)
 		{
-			return m_component_groups.back();
+			assert(entity_type_id.value == m_entity_type_ids[entity_type_id.value].value);
+
+			Entity_type_index const entity_type_index = { entity_type_id.value };
+
+			return m_component_groups[entity_type_index.value];
 		}
 
 

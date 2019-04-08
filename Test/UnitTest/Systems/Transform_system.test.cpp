@@ -91,7 +91,7 @@ namespace Maia::GameEngine::Systems::Test
 			AND_GIVEN("A Root_transform_entity_type <Local_position, Local_rotation, Transform_matrix>")
 			{
 				auto const root_transform_entity_type =
-					entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix>(2);
+					entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Entity>(2, Space{ 0 });
 
 				AND_GIVEN("Several root transform entities")
 				{
@@ -114,7 +114,7 @@ namespace Maia::GameEngine::Systems::Test
 					AND_GIVEN("A Child_transform_entity_type <Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent>")
 					{
 						auto const child_transform_entity_type =
-							entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent>(2);
+							entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent, Entity>(2, Space{ 0 });
 
 						AND_GIVEN("Several child transform entities")
 						{
@@ -213,7 +213,7 @@ namespace Maia::GameEngine::Systems::Test
 			{
 				float const pi = std::acos(-1.0f);
 
-				auto const root_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix>(1);
+				auto const root_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Entity>(1, Space{ 0 });
 
 				Entity const root_transform_entity = entity_manager.create_entity(
 					root_transform_entity_type,
@@ -223,7 +223,7 @@ namespace Maia::GameEngine::Systems::Test
 				);
 
 
-				auto const child_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent>(5);
+				auto const child_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent, Entity>(5, Space{ 0 });
 
 				Entity const child_transform_entity_0 = entity_manager.create_entity(
 					child_transform_entity_type,
@@ -385,7 +385,7 @@ namespace Maia::GameEngine::Systems::Test
 
 			AND_GIVEN("A root transform entity with a dirty flag and two child transforms")
 			{
-				auto const root_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_tree_dirty>(1);
+				auto const root_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_tree_dirty, Entity>(1, Space{ 0 });
 
 				Entity const root_transform_entity = entity_manager.create_entity(
 					root_transform_entity_type,
@@ -396,7 +396,7 @@ namespace Maia::GameEngine::Systems::Test
 				);
 
 
-				auto const child_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent>(2);
+				auto const child_transform_entity_type = entity_manager.create_entity_type<Local_position, Local_rotation, Transform_matrix, Transform_root, Transform_parent, Entity>(2, Space{ 0 });
 
 				Entity const child_transform_entity_0 = entity_manager.create_entity(
 					child_transform_entity_type,
