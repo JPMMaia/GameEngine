@@ -15,24 +15,16 @@
 
 namespace Maia::GameEngine::Systems
 {
+	// TODO move components to components folder
+
 	struct Transform_tree_dirty
 	{
 		bool value{ true };
-
-		static Component_ID ID()
-		{
-			return { 3 };
-		}
 	};
 
 	struct Transform_parent
 	{
 		Entity entity;
-
-		static Component_ID ID()
-		{
-			return { 4 };
-		}
 	};
 
 	inline bool operator==(Transform_parent const& lhs, Transform_parent const& rhs)
@@ -48,21 +40,11 @@ namespace Maia::GameEngine::Systems
 	struct Transform_root
 	{
 		Entity entity;
-
-		static Component_ID ID()
-		{
-			return { 5 };
-		}
 	};
 
 	struct Transform_matrix
 	{
 		Eigen::Matrix4f value{ Eigen::Matrix4f::Identity() };
-
-		static Component_ID ID()
-		{
-			return { 6 };
-		}
 	};
 
 	inline bool operator==(Transform_matrix const& lhs, Transform_matrix const& rhs)

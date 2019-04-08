@@ -2,7 +2,8 @@
 #define MAIA_GAMEENGINE_ENTITYTYPE_H_INCLUDED
 
 #include <cstddef>
-#include <ostream>
+#include <functional>
+#include <iosfwd>
 
 namespace Maia::GameEngine
 {
@@ -20,39 +21,22 @@ namespace Maia::GameEngine
 		return !(lhs == rhs);
 	}
 
-	inline std::ostream& operator<<(std::ostream& output_stream, Entity_type_id entity_type_id)
+	std::ostream& operator<<(std::ostream& output_stream, Entity_type_id entity_type_id);
+}
+
+namespace std
+{
+	template<> 
+	struct hash<Maia::GameEngine::Entity_type_id>
 	{
-		output_stream << entity_type_id.value;
+		using argument_type = Maia::GameEngine::Entity_type_id;
+		using result_type = std::size_t;
 
-		return output_stream;
-	}
-
-
-	template <typename... ComponentsT>
-	struct Entity_type
-	{
-		Entity_type_id id;
+		result_type operator()(argument_type const& entity_type) const noexcept
+		{
+			return std::hash<std::size_t>{}(entity_type.value);
+		}
 	};
-
-	template <typename... Components>
-	bool operator==(Entity_type<Components...> lhs, Entity_type<Components...> rhs)
-	{
-		return lhs.id == rhs.id;
-	}
-
-	template <typename... Components>
-	bool operator!=(Entity_type<Components...> lhs, Entity_type<Components...> rhs)
-	{
-		return !(lhs == rhs);
-	}
-
-	template <typename... Components>
-	std::ostream& operator<<(std::ostream& output_stream, Entity_type<Components...> entity_type)
-	{
-		output_stream << entity_type.id;
-		
-		return output_stream;
-	}
 }
 
 #endif

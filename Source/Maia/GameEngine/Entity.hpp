@@ -2,8 +2,7 @@
 #define MAIA_GAMEENGINE_ENTITY_H_INCLUDED
 
 #include <cstdint>
-#include <functional>
-#include <ostream>
+#include <iosfwd>
 
 #include <Maia/GameEngine/Component.hpp>
 
@@ -13,44 +12,14 @@ namespace Maia::GameEngine
 	{
 		using Integral_type = std::uint32_t;
 
-		Integral_type value {0};
-
-
-		static Component_ID ID()
-		{
-			return { 0 };
-		}
+		Integral_type value{ 0 };
 	};
 
-	inline bool operator==(Entity const& lhs, Entity const& rhs)
-	{
-		return lhs.value == rhs.value;
-	}
+	bool operator==(Entity lhs, Entity rhs);
 
-	inline bool operator!=(Entity const& lhs, Entity const& rhs)
-	{
-		return !(lhs == rhs);
-	}
+	bool operator!=(Entity lhs, Entity rhs);
 
-	inline std::ostream& operator<<(std::ostream& output_stream, Entity const& value)
-	{
-		output_stream << "{" << value.value << "}";
-		return output_stream;
-	}
-}
-
-namespace std
-{
-	template<> struct hash< Maia::GameEngine::Entity>
-	{
-		using argument_type = Maia::GameEngine::Entity;
-		using result_type = std::size_t;
-		
-		result_type operator()(argument_type const& entity) const noexcept
-		{
-			return std::hash<Maia::GameEngine::Entity::Integral_type>{}(entity.value);
-		}
-	};
+	std::ostream& operator<<(std::ostream& output_stream, Entity value);
 }
 
 #endif

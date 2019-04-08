@@ -3,18 +3,11 @@
 
 #include <Eigen/Core>
 
-#include <Maia/GameEngine/Entity.hpp>
-
 namespace Maia::GameEngine::Components
 {
 	struct Local_position
 	{
 		Eigen::Vector3f value{ 0.0f, 0.0f, 0.0f };
-
-		static Component_ID ID()
-		{
-			return { 1 };
-		}
 	};
 }
 

@@ -1,5 +1,7 @@
 #include <Maia/GameEngine/Systems/Transform_system.hpp>
 
+#include <iostream>
+
 namespace Maia::GameEngine::Systems
 {
 	Transform_matrix create_transform(Local_position const& position, Local_rotation const& rotation)
@@ -24,7 +26,7 @@ namespace Maia::GameEngine::Systems
 	{
 		Transforms_tree transforms_tree;
 
-		gsl::span<Component_types_group const> const component_types_groups =
+		gsl::span<Component_group_mask const> const component_types_groups =
 			entity_manager.get_component_types_groups();
 
 		gsl::span<Component_group const> const component_groups =
@@ -32,7 +34,7 @@ namespace Maia::GameEngine::Systems
 
 		for (std::ptrdiff_t component_group_index = 0; component_group_index < component_groups.size(); ++component_group_index)
 		{
-			Component_types_group const component_types = component_types_groups[component_group_index];
+			Component_group_mask const component_types = component_types_groups[component_group_index];
 
 			if (component_types.contains<Transform_root, Transform_parent>())
 			{
@@ -78,7 +80,7 @@ namespace Maia::GameEngine::Systems
 
 				Transform_matrix const local_transform_matrix = create_transform(position, rotation);
 
-				Transform_matrix const world_transform_matrix{ local_transform_matrix.value * root_transform_matrix.value };
+				Transform_matrix const world_transform_matrix{ root_transform_matrix.value * local_transform_matrix.value };
 				entity_manager.set_component_data(child_entity, world_transform_matrix);
 
 				auto const children_of_child_range = transforms_tree.equal_range({ child_entity });
@@ -112,7 +114,7 @@ namespace Maia::GameEngine::Systems
 	}
 	void Transform_system::execute(Entity_manager& entity_manager)
 	{
-		gsl::span<Component_types_group const> const component_types_groups =
+		gsl::span<Component_group_mask const> const component_types_groups =
 			entity_manager.get_component_types_groups();
 
 		gsl::span<Component_group> const component_groups =
@@ -120,7 +122,7 @@ namespace Maia::GameEngine::Systems
 
 		for (std::ptrdiff_t component_group_index = 0; component_group_index < component_groups.size(); ++component_group_index)
 		{
-			Component_types_group const component_types = component_types_groups[component_group_index];
+			Component_group_mask const component_types = component_types_groups[component_group_index];
 
 			if (component_types.contains<Transform_tree_dirty>())
 			{

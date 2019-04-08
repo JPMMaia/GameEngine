@@ -28,24 +28,31 @@ target_link_libraries (MaiaGameEngine PUBLIC GSL::GSL)
 target_sources (MaiaGameEngine 
 	PRIVATE
 		"Maia/GameEngine/Component.hpp"
+		"Maia/GameEngine/Component.cpp"
 		"Maia/GameEngine/Component_group.hpp"
-		"Maia/GameEngine/Component_types_group.hpp"
+		"Maia/GameEngine/Component_group.cpp"
+		"Maia/GameEngine/Component_group_mask.hpp"
+		"Maia/GameEngine/Component_group_mask.cpp"
+		"Maia/GameEngine/Components_chunk.hpp"
+		"Maia/GameEngine/Components_chunk.cpp"
+		
 		"Maia/GameEngine/Entity.hpp"
+		"Maia/GameEngine/Entity.cpp"
+		"Maia/GameEngine/Entity_hash.hpp"
+		"Maia/GameEngine/Entity_hash.cpp"
 		"Maia/GameEngine/Entity_manager.hpp"
 		"Maia/GameEngine/Entity_manager.cpp"
 		"Maia/GameEngine/Entity_type.hpp"
+		"Maia/GameEngine/Entity_type.cpp"
 		
 		"Maia/GameEngine/Components/Local_position.hpp"
+		"Maia/GameEngine/Components/Local_position.cpp"
 		"Maia/GameEngine/Components/Local_rotation.hpp"
+		"Maia/GameEngine/Components/Local_rotation.cpp"
+
 		"Maia/GameEngine/Systems/Transform_system.hpp"
 		"Maia/GameEngine/Systems/Transform_system.cpp"
 )
-
-target_sources (MaiaGameEngine 
-	PUBLIC
-		"${CMAKE_CURRENT_LIST_DIR}/Maia/GameEngine/Component_group.natvis"
-)
-
 
 install (TARGETS MaiaGameEngine EXPORT MaiaGameEngineTargets
 	LIBRARY DESTINATION "lib"
